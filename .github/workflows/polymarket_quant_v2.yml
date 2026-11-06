@@ -1,20 +1,21 @@
-name: Polymarket Paper v2 (Manual Start)
+name: Polymarket Paper v2 (Cloud, 24/7)
 
 # ============================================================================
-# 纸盘 v2 云端 workflow —— Phase 1 只是草稿，不自动运行。
+# 纸盘 v2 云端引擎：与 v1 并行跑，独立 repo / 独立 state-snapshot / 独立 Pages。
 #
-# Phase 6 才把它移到 .github/workflows/ 并加 cron：
-#   - 现在没有 schedule，只能手动 workflow_dispatch；
-#   - 避免 v2 代码还没验收就在云端自动开跑。
-#
-# 与 v1 的差异（唯一自变量是策略版本，基础设施保持一致）：
+# 与 v1 的差异（基础设施一致，只改策略版本）：
 #   * 起始本金 $100（v1 $12.81）
 #   * VARIANT=paper_v2 / STRATEGY_VERSION=v2.0-measure
-#   * 独立 repo / 独立 state-snapshot / 独立 Pages
-#   * 风控信封暂时与 v1 相同（MAX_SINGLE_BET=2.0），保证 v2.0 只改测量、不改交易行为
+#   * 独立 repo：designeryork/polymarket-quant-v2
+#   * Pages 由 publish_v2_pages.yml 从 state-snapshot 发布，不用外部 Pages 仓/PAT
+#
+# 安全：PAPER=true + ALLOW_LIVE=false，云端绝不可能下真单。
 # ============================================================================
 
 on:
+  schedule:
+    # v1 是 :07；v2 用 :17，错开 10 分钟，降低同时请求同一批公开接口的峰值。
+    - cron: '17 */5 * * *'
   workflow_dispatch:
     inputs:
       hours:
@@ -67,8 +68,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Restore State From Snapshot Branch
-        # 首次运行前必须先把 v2 的 $100 账本推到 state-snapshot 分支，
-        # 否则这一步会失败（这是有意的：不允许静默用空白账本开跑）。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p state logs
           python fetch_state.py
@@ -95,15 +96,11 @@ jobs:
       - name: Run Paper Loop
         env:
           RUN_HOURS: ${{ github.event.inputs.hours || '5' }}
-          PAGES_REPO: ${{ secrets.PAGES_REPO }}
-          PAGES_TOKEN: ${{ secrets.PAGES_TOKEN }}
         run: |
           python cloud_runner.py \
             --hours "$RUN_HOURS" \
             --interval "$ENGINE_INTERVAL" \
-            --push-interval 300 \
-            --pages-repo "$PAGES_REPO" \
-            --pages-token "$PAGES_TOKEN"
+            --push-interval 300
 
       - name: Push State Snapshot
         if: always()
@@ -117,4 +114,4 @@ jobs:
         run: |
           sleep 20
           gh workflow run polymarket_quant_v2.yml --ref master -f hours=5 \
-            || echo "::warning::下一轮触发失败；Phase 6 会加 cron 兜底"
+            || echo "::warning::下一轮触发失败，等待 cron 兜底"

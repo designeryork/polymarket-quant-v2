@@ -1,0 +1,61 @@
+name: Publish Paper v2 Dashboard
+
+# 从 state-snapshot 分支取 dashboard_paper.html，发布到本仓 gh-pages 分支。
+# 这样不需要外部 Pages 仓，也不需要 PAT：用 GITHUB_TOKEN + contents: write。
+#
+# 频率：每 5 分钟一次（GitHub cron 下限）。引擎每 5 分钟推一次快照，
+# 页面最坏延迟约 10 分钟；页面自身仍有 15 秒自动刷新，但内容来自最近一次发布。
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-paper-v2-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read Dashboard From State Snapshot
+        run: |
+          git fetch origin state-snapshot --depth=1 || {
+            echo "::warning::state-snapshot 分支还不存在，跳过"
+            exit 0
+          }
+          if ! git show origin/state-snapshot:dashboard_paper.html > /tmp/index.html 2>/dev/null; then
+            echo "::warning::state-snapshot 还没有 dashboard_paper.html，跳过"
+            exit 0
+          fi
+          echo "dashboard bytes: $(wc -c < /tmp/index.html)"
+
+      - name: Publish To gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f /tmp/index.html ]; then
+            echo "::warning::没有可发布的 dashboard，跳过"
+            exit 0
+          fi
+          rm -rf /tmp/pages
+          mkdir -p /tmp/pages
+          cp /tmp/index.html /tmp/pages/index.html
+          touch /tmp/pages/.nojekyll
+          cd /tmp/pages
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .nojekyll
+          git commit -m "update paper v2 dashboard $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages

@@ -8,15 +8,21 @@
 
 ## 当前状态
 
-**Phase 1（本地脚手架）**：
+**Phase 6 提前启用（2026-11-06）**：
+
+- 云端引擎：`.github/workflows/polymarket_quant_v2.yml`，`$100` 纸面，每 5 小时自续跑；
+- 公网面板：`.github/workflows/publish_v2_pages.yml` 从 `state-snapshot` 发布到 `gh-pages`；
+- 页面：<https://designeryork.github.io/polymarket-quant-v2/>；
+- v1 仍在原仓库、原页面并行跑，代码/账本未动。
+
+**Phase 1 脚手架**（已完成）：
 
 - 起始本金 **$100**（纸面虚拟本金，不连接钱包）；
 - 账本、心跳、面板、日志、锁全部隔离在独立目录；
 - 每条 EVAL / SIGNAL / RESOLUTION / 平仓 / 审计记录都带：
   - `variant: paper_v2`
   - `strategy_version: v2.0-measure`
-- 面板标题「纸盘 v2 · v2.0-measure」；
-- **云端 workflow 尚未启用**：`deploy/polymarket_quant_v2.yml.draft` 只是草稿，Phase 6 再移入 `.github/workflows/`。
+- 面板标题「纸盘 v2 · v2.0-measure」。
 
 ## 本地运行
 
@@ -53,7 +59,7 @@ STRATEGY_VERSION='v2.0-measure'
 | Phase 3 | `v2.1-exit` | 出场改回 logit 单位 | ⬜ |
 | Phase 4 | `v2.2-entry` | 经验条件概率入场 | ⬜ |
 | Phase 5 | `v2.3-sizing` | 删除凯利抬升 | ⬜ |
-| Phase 6 | — | v1/v2 云端并行对照 | ⬜ |
+| Phase 6 | — | v1/v2 云端并行对照 | 🟡 已启用（提前） |
 
 ## 安全
 
