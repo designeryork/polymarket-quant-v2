@@ -58,7 +58,6 @@ def find_gh() -> str | None:
 
 GH = find_gh()
 DEST = DEFAULT_DEST
-LOG_FILE = DEST / "sync.log"
 
 
 def log(message: str) -> None:
@@ -66,7 +65,7 @@ def log(message: str) -> None:
     print(line, flush=True)
     try:
         DEST.mkdir(parents=True, exist_ok=True)
-        with open(LOG_FILE, "a", encoding="utf-8") as handle:
+        with open(DEST / "sync.log", "a", encoding="utf-8") as handle:
             handle.write(line + "\n")
     except OSError:
         pass
