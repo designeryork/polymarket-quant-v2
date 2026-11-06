@@ -1,5 +1,8 @@
 # Polymarket 量化交易引擎（10U 专享版）
 
+> **这是纸盘 v2 实验仓。** v1 基线：`designeryork/polymarket-quant` @ `paper-v1-freeze-20261105`。
+> 当前 Phase 1：本地脚手架；云端 workflow 未启用。详见 [`PAPER_V2.md`](PAPER_V2.md)。
+
 > 从公开成交到无人值守：一套可 24 小时自动巡检的 Polymarket 量化策略引擎。
 > 当前处于**纸盘（Paper Trading）验证阶段** —— 只模拟撮合，不动真钱。
 

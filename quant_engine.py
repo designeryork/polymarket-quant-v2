@@ -133,6 +133,11 @@ GAMMA_MARKETS_URL = "https://gamma-api.polymarket.com/markets"
 CLOB_HOST = os.getenv("CLOB_HOST", "https://clob.polymarket.com")
 DATA_API_TRADES_URL = "https://data-api.polymarket.com/v2/trades"
 
+# 实验标识：纸盘 v2 的每条 EVAL / SIGNAL / RESOLUTION / 平仓 / 审计记录都带这两个字段，
+# 便于在 A/B 报告里按阶段切分样本。v1 没有这两个字段，默认值不影响 v1。
+VARIANT = os.getenv("VARIANT", "paper_v2").strip() or "paper_v2"
+STRATEGY_VERSION = os.getenv("STRATEGY_VERSION", "v2.0-measure").strip() or "v2.0-measure"
+
 
 # ==========================================================
 # 数学与 Logit 空间特征层 (Section 1 & Section 4)
@@ -747,6 +752,8 @@ def load_portfolio(risk: RiskEnvelope) -> Dict[str, Any]:
             pass
     init_state = {
         "mode": "PAPER (模拟实盘盘口撮合)" if risk.paper_mode else "LIVE (实盘)",
+        "variant": VARIANT,
+        "strategy_version": STRATEGY_VERSION,
         "wallet_address": os.getenv("WALLET_ADDRESS", ""),
         "initial_capital_usdc": risk.max_capital,
         "cash_usdc": risk.max_capital,
@@ -1020,6 +1027,8 @@ def cleanup_dangling_sell_orders(state: Dict[str, Any]) -> int:
 
 def append_audit_log(record: Dict[str, Any]) -> None:
     record["ts_utc"] = datetime.now(timezone.utc).isoformat()
+    record.setdefault("variant", VARIANT)
+    record.setdefault("strategy_version", STRATEGY_VERSION)
     with open(SIGNALS_LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -1086,6 +1095,8 @@ RESEARCH_LOG_FILE = LOGS_DIR / "strategy_research_samples.jsonl"
 
 def append_research_sample(record: Dict[str, Any]) -> None:
     record["ts_utc"] = datetime.now(timezone.utc).isoformat()
+    record.setdefault("variant", VARIANT)
+    record.setdefault("strategy_version", STRATEGY_VERSION)
     with open(RESEARCH_LOG_FILE, "a", encoding="utf-8") as file:
         file.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -1611,6 +1622,8 @@ def evaluate_existing_positions(
             state["realized_pnl_usdc"] = round(state["realized_pnl_usdc"] + pnl_usdc, 4)
             closed_item = {
                 **pos,
+                "variant": pos.get("variant", VARIANT),
+                "strategy_version": pos.get("strategy_version", STRATEGY_VERSION),
                 "exit_price_bid": best_bid,
                 "realized_pnl_usdc": pnl_usdc,
                 "realized_pnl_pct": pnl_pct,
@@ -1663,6 +1676,8 @@ def write_heartbeat(status: str) -> None:
         "pid": os.getpid(),
         "status": status,
         "mode": "PAPER" if os.getenv("PAPER", "true").lower() == "true" else "LIVE",
+        "variant": VARIANT,
+        "strategy_version": STRATEGY_VERSION,
         "updated_at_utc": datetime.now(timezone.utc).isoformat(),
     }
     target = heartbeat_file()
@@ -2558,6 +2573,8 @@ def _run_quant_cycle_inner(risk: RiskEnvelope, budget_seconds: int, round_starte
 
         new_pos = {
             "pos_id": f"POS-{int(time.time()*1000) % 1000000}",
+            "variant": VARIANT,
+            "strategy_version": STRATEGY_VERSION,
             "event_id": event_id,
             "market_question": question,
             "outcome": outcome_label,
@@ -3545,7 +3562,7 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="refresh" content="15">
-<title>Polymarket · 量化交易监控</title>
+<title>Polymarket · 纸盘 v2 · {STRATEGY_VERSION}</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzM0ZDM5OSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA0Nzg1NyIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgo8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCNnKSIvPgo8cG9seWxpbmUgcG9pbnRzPSIxMiw0NCAyNCwzMyAzNCwzOSA1MCwyMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjBmZGY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8Y2lyY2xlIGN4PSI1MCIgY3k9IjIxIiByPSI2LjUiIGZpbGw9IiNmYmJmMjQiIHN0cm9rZT0iIzA2NWY0NiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPg==">
 <style>
   :root {{
@@ -3801,12 +3818,12 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">PM</div>
       <div>
-        <div class="title-line"><h1>Polymarket</h1><span class="mode-pill">{state['mode']}</span>{mode_tabs}</div>
-        <div class="brand-subtitle">量化交易监控终端 · Best Bid 真实盘口计价</div>
+        <div class="title-line"><h1>Polymarket</h1><span class="mode-pill">{state['mode']}</span><span class="mode-pill">纸盘 v2 · {STRATEGY_VERSION}</span>{mode_tabs}</div>
+        <div class="brand-subtitle">量化交易监控终端 · 纸盘 v2 · {STRATEGY_VERSION} · Best Bid 真实盘口计价</div>
       </div>
     </div>
     <div class="header-meta">
-      <div class="wallet"><span class="meta-label">专属钱包</span><code title="{state['wallet_address']}">{state['wallet_address']}</code></div>
+      <div class="wallet"><span class="meta-label">专属钱包</span><code title="{state['wallet_address'] or '纸面模拟，不连接钱包'}">{state['wallet_address'] or '纸面模拟 · 无钱包'}</code></div>
       <div><span class="meta-label">最后更新 · 15 秒自动刷新</span><div class="updated-time">{state['last_updated']}</div></div>
     </div>
   </header>

@@ -1,0 +1,120 @@
+name: Polymarket Paper v2 (Manual Start)
+
+# ============================================================================
+# 纸盘 v2 云端 workflow —— Phase 1 只是草稿，不自动运行。
+#
+# Phase 6 才把它移到 .github/workflows/ 并加 cron：
+#   - 现在没有 schedule，只能手动 workflow_dispatch；
+#   - 避免 v2 代码还没验收就在云端自动开跑。
+#
+# 与 v1 的差异（唯一自变量是策略版本，基础设施保持一致）：
+#   * 起始本金 $100（v1 $12.81）
+#   * VARIANT=paper_v2 / STRATEGY_VERSION=v2.0-measure
+#   * 独立 repo / 独立 state-snapshot / 独立 Pages
+#   * 风控信封暂时与 v1 相同（MAX_SINGLE_BET=2.0），保证 v2.0 只改测量、不改交易行为
+# ============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: '本次连续运行多少小时（默认 5）'
+        required: false
+        default: '5'
+
+concurrency:
+  group: polymarket-paper-v2
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  paper-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      PAPER: 'true'
+      ALLOW_LIVE: 'false'
+      ALLOW_DIRECT: 'true'
+      SCAN_LIMIT: '60'
+      ROUND_BUDGET_SECONDS: '240'
+      ENGINE_INTERVAL: '60'
+      VARIANT: 'paper_v2'
+      STRATEGY_VERSION: 'v2.0-measure'
+      MAX_CAPITAL_USDC: '100'
+      MAX_SINGLE_BET_USDC: '2.0'
+      MIN_SINGLE_BET_USDC: '1.0'
+      MAX_OPEN_POSITIONS: '4'
+      DAILY_LOSS_LIMIT_USDC: '2.0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Restore State From Snapshot Branch
+        # 首次运行前必须先把 v2 的 $100 账本推到 state-snapshot 分支，
+        # 否则这一步会失败（这是有意的：不允许静默用空白账本开跑）。
+        run: |
+          mkdir -p state logs
+          python fetch_state.py
+
+      - name: Verify Ledger Restored
+        run: |
+          if [ ! -f state/portfolio_paper.json ]; then
+            echo "::error::账本未恢复，拒绝启动引擎"
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          data = json.load(open("state/portfolio_paper.json", encoding="utf-8"))
+          equity = float(data.get("total_equity_usdc") or 0)
+          initial = float(data.get("initial_capital_usdc") or 0)
+          positions = len(data.get("open_positions") or [])
+          print(f"账本校验通过: 净值 ${equity:.2f} | 初始 ${initial:.2f} | 持仓 {positions} | 更新时间 {data.get('last_updated')}")
+          if data.get("variant") != "paper_v2":
+              print("::warning::账本 variant 不是 paper_v2，请检查是否拿错了账本")
+          if positions == 0 and equity <= initial and data.get("closed_trades"):
+              print("::warning::账本净值异常（可能已被重置），请检查")
+          PY
+
+      - name: Run Paper Loop
+        env:
+          RUN_HOURS: ${{ github.event.inputs.hours || '5' }}
+          PAGES_REPO: ${{ secrets.PAGES_REPO }}
+          PAGES_TOKEN: ${{ secrets.PAGES_TOKEN }}
+        run: |
+          python cloud_runner.py \
+            --hours "$RUN_HOURS" \
+            --interval "$ENGINE_INTERVAL" \
+            --push-interval 300 \
+            --pages-repo "$PAGES_REPO" \
+            --pages-token "$PAGES_TOKEN"
+
+      - name: Push State Snapshot
+        if: always()
+        run: |
+          python sync_state.py push || echo "::warning::状态快照推送失败"
+
+      - name: Trigger Next Round
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sleep 20
+          gh workflow run polymarket_quant_v2.yml --ref master -f hours=5 \
+            || echo "::warning::下一轮触发失败；Phase 6 会加 cron 兜底"
