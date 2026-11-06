@@ -108,7 +108,8 @@ jobs:
           python sync_state.py push || echo "::warning::状态快照推送失败"
 
       - name: Trigger Next Round
-        if: always()
+        # 只有正式 5 小时轮次才自续跑；0.05/0.25 这类诊断跑结束后不再排队 5 小时。
+        if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.hours == '5' || github.event.inputs.hours == '') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
