@@ -102,6 +102,7 @@ Polymarket 量化交易全过程.docx
 Polymarket量化交易全过程_从公开成交到无人值守.html
 Screen-shot/
 *.bat
+*.vbs
 STOP
 STOP.disabled
 # 跟单纸盘：页面为运行时产物（引擎每分钟重新生成），预览文件同理
