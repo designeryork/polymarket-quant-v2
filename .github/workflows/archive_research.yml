@@ -1,0 +1,41 @@
+name: Archive Research Logs
+
+# 每周把未归档的 research-logs-* artifact 打成 run-<run_id>.tar.gz，
+# 上传到月度 Release research-archive-YYYY-MM。
+#
+# 为什么每周：artifact 只保留 30 天；每周跑一次可以保证在过期前归档。
+# 为什么用 Release：单文件 ≤2 GiB、单 release ≤1000 个附件、无总大小限制，
+# 不占 500 MB artifact 池，也不让 git 仓库膨胀。
+
+on:
+  schedule:
+    # 每周一 03:17 UTC
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: archive-research-logs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Archive missing research artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python archive_research.py --repo "$REPO" --limit 50
