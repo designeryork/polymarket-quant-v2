@@ -96,6 +96,7 @@ jobs:
       - name: Run Paper Loop
         env:
           RUN_HOURS: ${{ github.event.inputs.hours || '5' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python cloud_runner.py \
             --hours "$RUN_HOURS" \

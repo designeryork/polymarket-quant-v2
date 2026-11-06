@@ -37,6 +37,41 @@ def log(message: str) -> None:
     print(f"[cloud_runner] {message}", flush=True)
 
 
+def publish_pages_self() -> None:
+    """把面板推到本仓 gh-pages（v2 默认路径，不依赖 Actions cron）。
+
+    为什么：GitHub 的 ``schedule: */5`` 不保证按时触发，实测曾停 59 分钟，
+    页面显示"监控数据已过期"。引擎本来就在每 5 分钟 run_sync，顺手把面板
+    推上去最可靠。需要 GITHUB_TOKEN + contents: write。
+    """
+    script = BASE / "publish_pages_self.py"
+    if not script.exists() or not DASHBOARD.exists():
+        return
+    try:
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--repo",
+                os.getenv("GITHUB_REPOSITORY", ""),
+                "--dashboard",
+                str(DASHBOARD),
+            ],
+            cwd=str(BASE),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=180,
+        )
+        if result.returncode != 0:
+            log(f"面板自发布失败：{(result.stderr or result.stdout or '').strip()[:200]}")
+        else:
+            log("面板已自发布到 gh-pages")
+    except Exception as exc:
+        log(f"面板自发布异常：{type(exc).__name__}: {exc}")
+
+
 def publish_pages(pages_repo: str, token: str) -> None:
     """把最新面板推到公开面板仓，Pages 会自动重新发布。
 
@@ -44,6 +79,7 @@ def publish_pages(pages_repo: str, token: str) -> None:
     5 小时轮次里页面就一直停在旧数据，前端会显示"监控数据已过期"。
     """
     if not pages_repo or not token:
+        publish_pages_self()
         return
     if not DASHBOARD.exists():
         return
