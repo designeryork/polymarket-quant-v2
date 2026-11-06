@@ -107,6 +107,20 @@ jobs:
         run: |
           python sync_state.py push || echo "::warning::状态快照推送失败"
 
+      - name: Upload Research Logs
+        # 研究日志不进 state-snapshot（避免 force-push 丢历史），单独做 artifact。
+        # 30 天保留；本地 sync_research.py 每天拉取；月度/周度 Release 归档做永久备份。
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-logs-${{ github.run_id }}
+          path: |
+            logs/strategy_research_samples.jsonl
+            logs/signals_and_skips.jsonl
+            logs/trading_errors.jsonl
+          retention-days: 30
+          if-no-files-found: warn
+
       - name: Trigger Next Round
         # 只有正式 5 小时轮次才自续跑；0.05/0.25 这类诊断跑结束后不再排队 5 小时。
         if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.hours == '5' || github.event.inputs.hours == '') }}

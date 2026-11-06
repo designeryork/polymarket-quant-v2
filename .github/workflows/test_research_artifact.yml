@@ -1,0 +1,23 @@
+name: Test Research Artifact
+
+# 临时测试 workflow：生成一个小 artifact，验证 sync_research.py。
+# 验证完成后删除本文件与 artifact。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create test logs
+        run: |
+          mkdir -p logs
+          printf '%s\n' '{"record_type":"EVAL","variant":"paper_v2","test":true,"p_est":0.31}' > logs/strategy_research_samples.jsonl
+          printf '%s\n' '{"action":"TEST","variant":"paper_v2"}' > logs/signals_and_skips.jsonl
+      - name: Upload test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-logs-test
+          path: logs/*.jsonl
+          retention-days: 1
