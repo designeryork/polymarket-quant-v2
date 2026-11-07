@@ -62,6 +62,7 @@ jobs:
               git remote add origin "$PAGES_URL"
             fi
             cp /tmp/index.html /tmp/pages/index.html
+            python inject_parity_link.py --input /tmp/pages/index.html
             touch /tmp/pages/.nojekyll
             cd /tmp/pages
             git config user.name "github-actions[bot]"

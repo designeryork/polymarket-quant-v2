@@ -19,6 +19,8 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from inject_parity_link import inject_html
+
 
 def run(cmd: list[str], cwd: str | None = None, timeout: int = 120) -> subprocess.CompletedProcess:
     return subprocess.run(
@@ -60,7 +62,8 @@ def main() -> int:
             run(["git", "init", "-b", args.branch], cwd=str(work))
             run(["git", "remote", "add", "origin", url], cwd=str(work))
 
-        shutil.copy2(dashboard, work / "index.html")
+        html = dashboard.read_text(encoding="utf-8")
+        (work / "index.html").write_text(inject_html(html), encoding="utf-8")
         (work / ".nojekyll").write_text("", encoding="utf-8")
         run(["git", "config", "user.name", "polymarket-quant-bot"], cwd=str(work))
         run(["git", "config", "user.email", "bot@users.noreply.github.com"], cwd=str(work))

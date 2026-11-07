@@ -248,7 +248,7 @@ def render(report: dict, source_name: str = "") -> str:
         [
             kpi("扫描市场", num(coverage.get("markets")), f"事件 {num(coverage.get('events'))} 个"),
             kpi("多腿事件", num(coverage.get("multi_leg_events")), f"可评估 {num(coverage.get('eligible_events'))} 个"),
-            kpi("已验证腿数", num(verified), "官方腿数与快照一致", GREEN if verified else "#e5edf7"),
+            kpi("已验证事件", num(verified), "官方腿数与快照一致", GREEN if verified else "#e5edf7"),
             kpi("篮子候选", num(len(basket_candidates)), "扣费后完整篮子", GREEN if basket_candidates else "#e5edf7"),
             kpi("同市场候选", num(len(parity_candidates)), f"检查 {num(checked_parity)} 个市场"),
             kpi("可疑原始组", num(len(suspicious)), f"缺腿 {group_incomplete} · 未验证 {group_unverified}", ORANGE if suspicious else "#e5edf7"),
