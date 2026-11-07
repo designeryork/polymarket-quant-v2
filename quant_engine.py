@@ -3830,6 +3830,17 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
 
   <div class="notice-stack">{status_strip}{error_notice}</div>
 
+  <section id="research-progress" style="display:none;margin:10px 0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:10px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase">Research gate · 1,000 resolved tokens</div>
+        <div style="font-size:20px;font-weight:700;color:var(--text);margin-top:2px"><span id="rp-resolved">—</span><span style="font-size:12px;color:var(--muted);font-weight:400"> / 1,000</span></div>
+      </div>
+      <div id="rp-meta" style="font-size:10px;color:var(--muted);text-align:right">等待 research_status.json…</div>
+    </div>
+    <div style="height:6px;background:var(--card-raised);border-radius:99px;margin-top:10px;overflow:hidden"><div id="rp-bar" style="height:6px;width:0;background:linear-gradient(90deg,#34d399,#7dd3fc);border-radius:99px;transition:width .4s"></div></div>
+  </section>
+
   <section class="kpi-grid" aria-label="账户概览">
     <div class="kpi-card">
       <div class="kpi-label"><span>账户总净值</span><span class="kpi-english">Equity</span></div>
@@ -4015,6 +4026,29 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
     }}
   }}
 
+}})();
+</script>
+<script>
+(function() {{
+  function paintResearch(d) {{
+    if (!d) return;
+    var section = document.getElementById('research-progress');
+    if (!section) return;
+    section.style.display = 'block';
+    var resolved = Number(d.resolved_unique || 0);
+    var target = Number(d.target || 1000);
+    var pct = target > 0 ? Math.min(100, resolved / target * 100) : 0;
+    document.getElementById('rp-resolved').textContent = resolved;
+    document.getElementById('rp-bar').style.width = pct.toFixed(1) + '%';
+    var fmt = function(v) {{ return (v === undefined || v === null) ? '—' : v; }};
+    document.getElementById('rp-meta').textContent =
+      'v1 ' + fmt(d.v1_resolved) + ' · v2 ' + fmt(d.v2_resolved) +
+      ' · EVAL ' + fmt(d.eval_records) + ' · ' + (d.generated_at || '');
+  }}
+  fetch('research_status.json', {{cache: 'no-store'}})
+    .then(function(r) {{ return r.ok ? r.json() : null; }})
+    .then(paintResearch)
+    .catch(function() {{}});
 }})();
 </script>
 </body>

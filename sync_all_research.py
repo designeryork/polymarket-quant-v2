@@ -87,6 +87,14 @@ def main() -> int:
         ]
     )
     rc = rc or ab.returncode
+
+    # Publish research progress to gh-pages for the dashboard panel.
+    print("== research status", flush=True)
+    status_result = subprocess.run(
+        [sys.executable, str(BASE / "publish_research_status.py")]
+    )
+    if status_result.returncode != 0:
+        print("[sync_all_research] research status publish failed (ignored)", flush=True)
     return rc
 
 

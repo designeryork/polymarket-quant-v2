@@ -38,6 +38,7 @@ jobs:
     env:
       PAPER: 'true'
       ALLOW_LIVE: 'false'
+      ALLOW_NEW_ENTRIES: 'true'
       ALLOW_DIRECT: 'true'
       SCAN_LIMIT: '60'
       ROUND_BUDGET_SECONDS: '240'
