@@ -48,14 +48,35 @@ jobs:
             echo "::warning::没有可发布的 dashboard，跳过"
             exit 0
           fi
-          rm -rf /tmp/pages
-          mkdir -p /tmp/pages
-          cp /tmp/index.html /tmp/pages/index.html
-          touch /tmp/pages/.nojekyll
-          cd /tmp/pages
-          git init -b gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html .nojekyll
-          git commit -m "update paper v2 dashboard $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+          PAGES_URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # 不能再用 git init + --force：那会把 parity.html 等研究页一起删掉。
+          # 每次尝试都重新克隆最新 gh-pages，只替换 index.html，保留其它文件。
+          for attempt in 1 2 3; do
+            rm -rf /tmp/pages
+            if git clone --depth 1 --branch gh-pages "$PAGES_URL" /tmp/pages 2>/dev/null; then
+              :
+            else
+              mkdir -p /tmp/pages
+              cd /tmp/pages
+              git init -b gh-pages
+              git remote add origin "$PAGES_URL"
+            fi
+            cp /tmp/index.html /tmp/pages/index.html
+            touch /tmp/pages/.nojekyll
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html .nojekyll
+            if git diff --cached --quiet; then
+              echo "面板无变化，跳过提交"
+              exit 0
+            fi
+            git commit -m "update paper v2 dashboard $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            if git push origin HEAD:gh-pages; then
+              exit 0
+            fi
+            echo "::warning::gh-pages 推送冲突，重试 $attempt/3"
+            sleep 3
+          done
+          echo "::error::gh-pages 推送连续失败"
+          exit 1

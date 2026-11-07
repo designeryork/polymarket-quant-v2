@@ -1,0 +1,94 @@
+name: Parity Scan (Read-only, Pages)
+
+# 只读平价/事件篮子扫描：抓一份新的 Gamma 市场宇宙，核对官方腿数，
+# 再检查同市场 YES+NO 盘口，生成静态页面并发布到本仓 gh-pages。
+#
+# 安全边界：
+#   * 不读私钥、不下单、不修改纸盘账本或引擎参数；
+#   * 只写 gh-pages 的 parity.html / parity.json / 历史归档；
+#   * 扫描失败时保留上一版页面，不用空结果覆盖。
+
+on:
+  schedule:
+    # 每 6 小时一次（UTC）。GitHub 的 schedule 可能延迟，页面会显示快照时间。
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      event_detail_limit:
+        description: '最多核对多少个事件的官方腿数'
+        required: false
+        default: '120'
+      book_limit:
+        description: '最多检查多少个市场的 CLOB 盘口'
+        required: false
+        default: '60'
+
+concurrency:
+  group: parity-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ALLOW_DIRECT: 'true'
+      PYTHONUNBUFFERED: '1'
+      EVENT_DETAIL_LIMIT: ${{ github.event.inputs.event_detail_limit || '120' }}
+      BOOK_LIMIT: ${{ github.event.inputs.book_limit || '60' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Read-only Scan
+        run: |
+          mkdir -p state/parity
+          python parity_scan.py \
+            --refresh-universe \
+            --event-details \
+            --event-detail-limit "$EVENT_DETAIL_LIMIT" \
+            --books \
+            --book-limit "$BOOK_LIMIT" \
+            --out-dir state/parity \
+            --date "$(date -u +%F)"
+
+      - name: Render Static Page
+        run: |
+          python parity_page.py \
+            --input-dir state/parity \
+            --output state/parity/parity.html
+
+      - name: Publish To gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python publish_parity_page.py \
+            --html state/parity/parity.html \
+            --json "state/parity/parity_$(date -u +%F).json"
+
+      - name: Upload Scan Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-scan-${{ github.run_id }}
+          path: |
+            state/parity/parity_*.json
+            state/parity/parity_*.md
+            state/parity/parity.html
+          retention-days: 30
+          if-no-files-found: warn

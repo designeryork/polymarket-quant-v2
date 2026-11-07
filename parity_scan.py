@@ -5,17 +5,22 @@ No keys, no orders, no engine changes.
 
 Modes
 -----
+0. `--refresh-universe`: fetch a fresh active-market universe from Gamma
+   instead of reading a local snapshot. Used by the scheduled Pages scan.
 1. Offline (default): scan the local Gamma snapshot for **complete negRisk
    event baskets** (buy all YES legs; if sum ask + fees < 1, edge).
-2. `--books`: also fetch CLOB order books for a limited set of markets and
-   evaluate same-market parity (YES ask + NO ask + fees < 1). Requires a
-   working proxy; if unavailable, the offline basket scan still runs.
+2. `--event-details`: fetch the official leg count for each negRisk event
+   from Gamma. Without it, raw groups are never treated as candidates.
+3. `--books`: also fetch CLOB order books for a limited set of markets and
+   evaluate same-market parity (YES ask + NO ask + fees < 1).
 
 Usage
 -----
     python parity_scan.py
     python parity_scan.py --min-edge 0.015 --max-edge 0.10 --min-hours 2
+    python parity_scan.py --event-details --event-detail-limit 120
     python parity_scan.py --books --book-limit 40
+    python parity_scan.py --refresh-universe --event-details --books
     python parity_scan.py --snapshot ../032_polymarket/state/market_universe.json
 """
 from __future__ import annotations
@@ -105,6 +110,60 @@ def load_snapshot(path: Path) -> tuple[list[dict], str]:
         markets = data
         discovered = ""
     return markets, discovered
+
+
+def fetch_universe(session, sleep_seconds: float = 0.15) -> tuple[list[dict], str]:
+    """Fetch the current active-market universe from Gamma.
+
+    Mirrors the engine's pagination guard: Gamma caps a page at 100, returns
+    422 once the offset goes too deep, and ``active=true`` still includes
+    expired markets. We stop on a short page or the 422 cap and drop anything
+    whose end date has passed.
+    """
+    import time
+
+    params = {
+        "active": "true",
+        "closed": "false",
+        "limit": 100,
+        "order": "volume24hr",
+        "ascending": "false",
+    }
+    discovered: list[dict] = []
+    offset = 0
+    while offset < 10000:
+        try:
+            response = session.get(
+                f"{GAMMA_HOST}/markets",
+                params={**params, "offset": offset},
+                timeout=20,
+            )
+        except Exception as exc:
+            if discovered:
+                print(f"[parity_scan] universe page offset={offset} failed: {exc}", flush=True)
+                break
+            raise
+        if response.status_code == 422 and offset >= 2000 and discovered:
+            print(f"[parity_scan] universe reached Gamma offset cap at {offset}", flush=True)
+            break
+        response.raise_for_status()
+        page = response.json()
+        if not isinstance(page, list) or not page:
+            break
+        alive = [market for market in page if hours_left(market) > 0]
+        discovered.extend(alive)
+        if len(page) < 100:
+            break
+        offset += 100
+        time.sleep(max(0.0, sleep_seconds))
+
+    unique: dict[str, dict] = {}
+    for market in discovered:
+        key = str(market.get("conditionId") or market.get("id") or market.get("question") or "")
+        if key:
+            unique[key] = market
+    ordered = sorted(unique.values(), key=lambda row: str(row.get("conditionId") or row.get("id") or ""))
+    return ordered, now_utc()
 
 
 def event_groups(markets: list[dict]) -> dict[str, dict]:
@@ -496,6 +555,8 @@ def fetch_official_counts(markets: list[dict], limit: int, sleep_seconds: float)
 def main() -> int:
     parser = argparse.ArgumentParser(description="Read-only parity / event-basket scanner")
     parser.add_argument("--snapshot", default=str(DEFAULT_SNAPSHOT))
+    parser.add_argument("--refresh-universe", action="store_true",
+                        help="fetch a fresh active-market universe from Gamma instead of the local snapshot")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT))
     parser.add_argument("--date", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     parser.add_argument("--min-edge", type=float, default=0.015)
@@ -511,11 +572,39 @@ def main() -> int:
     args = parser.parse_args()
 
     snapshot = Path(args.snapshot)
-    if not snapshot.exists():
-        print(f"snapshot not found: {snapshot}", file=sys.stderr)
-        return 2
-    markets, discovered = load_snapshot(snapshot)
-    print(f"[parity_scan] snapshot markets={len(markets)} discovered={discovered}", flush=True)
+    markets: list[dict] = []
+    discovered = ""
+    snapshot_label = str(snapshot)
+    universe_mode = "snapshot"
+    if args.refresh_universe:
+        try:
+            import proxy_detector
+
+            session = proxy_detector.build_session()
+            markets, discovered = fetch_universe(session, args.sleep)
+            if not markets:
+                raise RuntimeError("Gamma returned an empty universe")
+            snapshot_label = f"live Gamma /markets · {len(markets)} markets"
+            universe_mode = "live"
+            print(
+                f"[parity_scan] live universe markets={len(markets)} discovered={discovered}",
+                flush=True,
+            )
+        except Exception as exc:
+            print(f"[parity_scan] live universe failed: {exc}", flush=True)
+            if not snapshot.exists():
+                print(
+                    f"live universe failed and snapshot not found: {snapshot}",
+                    file=sys.stderr,
+                )
+                return 2
+
+    if not markets:
+        if not snapshot.exists():
+            print(f"snapshot not found: {snapshot}", file=sys.stderr)
+            return 2
+        markets, discovered = load_snapshot(snapshot)
+        print(f"[parity_scan] snapshot markets={len(markets)} discovered={discovered}", flush=True)
 
     official_counts: dict[str, int] = {}
     official_note = "offline; official leg counts unavailable"
@@ -552,9 +641,10 @@ def main() -> int:
 
     report = {
         "generated_at": now_utc(),
-        "snapshot": str(snapshot),
+        "snapshot": snapshot_label,
         "snapshot_at": discovered,
         "settings": {
+            "universe_mode": universe_mode,
             "min_edge": args.min_edge,
             "max_edge": args.max_edge,
             "min_hours": args.min_hours,
@@ -567,6 +657,7 @@ def main() -> int:
             "size_usd": args.size_usd,
         },
         "coverage": {
+            "universe_mode": universe_mode,
             "markets": len(markets),
             "events": len(event_groups(markets)),
             "multi_leg_events": basket["multi_leg_events"],

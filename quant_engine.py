@@ -3288,6 +3288,7 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
         f'<a class="{_tab_class("reverse")}" href="dashboard_reverse.html">反向持有</a>'
         f'<a class="{_tab_class("maker")}" href="dashboard_maker.html">反向挂单</a>'
         '<a href="copy.html">跟单纸盘</a>'
+        '<a href="parity.html" target="_blank" rel="noopener" title="只读平价/事件篮子扫描">平价扫描</a>'
         "</span>"
     )
 
