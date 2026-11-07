@@ -11,9 +11,17 @@
 **Phase 6 提前启用（2026-11-06）**：
 
 - 云端引擎：`.github/workflows/polymarket_quant_v2.yml`，`$100` 纸面，每 5 小时自续跑；
-- 公网面板：`.github/workflows/publish_v2_pages.yml` 从 `state-snapshot` 发布到 `gh-pages`；
+- 公网面板：`cloud_runner` 每 5 分钟用 `publish_pages_self.py` 直接推 `gh-pages`（不再依赖 publisher cron；`publish_v2_pages.yml` 保留手动 fallback）；
 - 页面：<https://designeryork.github.io/polymarket-quant-v2/>；
 - v1 仍在原仓库、原页面并行跑，代码/账本未动。
+
+**实时页面说明**：
+
+- 公网实时：<https://designeryork.github.io/polymarket-quant-v2/>
+- 本地 `dashboard_paper.html` 现在是**跳转页**，双击会打开公网页面；
+- 如果本地跑 `python start_v2.py`，引擎会把它覆盖成本地实时页面；
+- `LIVE_DASHBOARD.url` 是 Windows 快捷方式；
+- 直接打开旧的本地快照会显示“监控数据已过期”，那不是引擎停了，而是本地没有跑循环。
 
 **Phase 1 脚手架**（已完成）：
 

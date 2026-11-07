@@ -72,6 +72,7 @@ dashboard.html
 dashboard_hedge.html
 dashboard_maker.html
 dashboard_paper.html
+dashboard_paper_local_snapshot.html
 dashboard_reverse.html
 
 # 公开仓用不到的一次性运维脚本（仅本地网络异常时手动执行）
@@ -103,6 +104,7 @@ Polymarket量化交易全过程_从公开成交到无人值守.html
 Screen-shot/
 *.bat
 *.vbs
+*.url
 STOP
 STOP.disabled
 # 跟单纸盘：页面为运行时产物（引擎每分钟重新生成），预览文件同理
