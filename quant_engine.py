@@ -3561,7 +3561,6 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="15">
 <title>Polymarket · 纸盘 v2 · {STRATEGY_VERSION}</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzM0ZDM5OSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA0Nzg1NyIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgo8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCNnKSIvPgo8cG9seWxpbmUgcG9pbnRzPSIxMiw0NCAyNCwzMyAzNCwzOSA1MCwyMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjBmZGY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8Y2lyY2xlIGN4PSI1MCIgY3k9IjIxIiByPSI2LjUiIGZpbGw9IiNmYmJmMjQiIHN0cm9rZT0iIzA2NWY0NiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPg==">
 <style>
@@ -3830,7 +3829,7 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
         <div id="rp-meta" style="font-size:9px;color:var(--muted);margin-top:4px">等待 research_status.json…</div>
       </div>
       <div class="wallet"><span class="meta-label">专属钱包</span><code title="{state['wallet_address'] or '纸面模拟，不连接钱包'}">{state['wallet_address'] or '纸面模拟 · 无钱包'}</code></div>
-      <div><span class="meta-label">最后更新 · 15 秒自动刷新</span><div class="updated-time">{state['last_updated']}</div></div>
+      <div><span class="meta-label">最后更新 · 30 秒检查更新</span><div class="updated-time">{state['last_updated']}</div></div>
     </div>
   </header>
 
@@ -3999,28 +3998,47 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
   // 页面自检：引擎停止后 HTML 不再生成，但浏览器仍每 15 秒重载同一份文件，
   // 顶栏会一直显示最后一次的状态（例如"系统连接正常"）。这里用生成时间判断过期。
   const generatedAt = document.body.dataset.generatedAt;
-  if (generatedAt) {{
+  const checkStale = () => {{
+    if (!generatedAt) return;
     const ageSec = (Date.now() - new Date(generatedAt).getTime()) / 1000;
-    if (ageSec > 600) {{
-      const strip = document.querySelector('.status-strip');
-      if (strip) {{
-        strip.className = 'status-strip danger';
-        const dot = document.createElement('span');
-        dot.className = 'banner-dot';
-        const strong = document.createElement('strong');
-        strong.textContent = '监控数据已过期 ' + Math.round(ageSec / 60) + ' 分钟';
-        const detail = document.createElement('span');
-        detail.className = 'status-headline';
-        detail.textContent = '引擎可能已停止：页面仍在刷新，但数据不再更新。请检查进程或重新运行启动器。';
-        strip.textContent = '';
-        strip.appendChild(dot);
-        strip.appendChild(strong);
-        strip.appendChild(detail);
-        document.body.classList.add('data-stale');
-      }}
-    }}
-  }}
+    if (ageSec <= 600) return;
+    const strip = document.querySelector('.status-strip');
+    if (!strip || strip.classList.contains('danger')) return;
+    strip.className = 'status-strip danger';
+    const dot = document.createElement('span');
+    dot.className = 'banner-dot';
+    const strong = document.createElement('strong');
+    strong.textContent = '监控数据已过期 ' + Math.round(ageSec / 60) + ' 分钟';
+    const detail = document.createElement('span');
+    detail.className = 'status-headline';
+    detail.textContent = '引擎可能已停止：页面仍在刷新，但数据不再更新。请检查进程或重新运行启动器。';
+    strip.textContent = '';
+    strip.appendChild(dot);
+    strip.appendChild(strong);
+    strip.appendChild(detail);
+    document.body.classList.add('data-stale');
+  }};
+  checkStale();
+  setInterval(checkStale, 30000);
 
+}})();
+</script>
+<script>
+(function() {{
+  var current = document.body.dataset.generatedAt || '';
+  if (!current) return;
+  async function checkForUpdate() {{
+    try {{
+      var response = await fetch(window.location.pathname + '?poll=' + Date.now(), {{cache: 'no-store'}});
+      if (!response.ok) return;
+      var text = await response.text();
+      var match = text.match(/data-generated-at="([^"]+)"/);
+      if (match && match[1] && match[1] !== current) {{
+        window.location.reload();
+      }}
+    }} catch (error) {{}}
+  }}
+  setInterval(checkForUpdate, 30000);
 }})();
 </script>
 <script>
