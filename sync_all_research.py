@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent
@@ -72,6 +73,20 @@ def main() -> int:
         ]
     )
     rc = rc or metrics.returncode
+
+    # Phase 2.3: A/B observation report (v1 vs v2).
+    print("== A/B report", flush=True)
+    ab = subprocess.run(
+        [
+            sys.executable,
+            str(BASE / "ab_report.py"),
+            "--archive",
+            r"D:\2026_APPs by AI\_research_archive",
+            "--period",
+            datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        ]
+    )
+    rc = rc or ab.returncode
     return rc
 
 
