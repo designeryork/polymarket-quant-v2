@@ -37,6 +37,25 @@ def main() -> int:
             ]
         )
         rc = rc or result.returncode
+
+    # Phase 2.1: resolve every archived EVAL token to 1/0 after syncing.
+    # --limit 0 covers all unresolved tokens, so nothing is permanently skipped.
+    print("== resolve research tokens", flush=True)
+    resolve = subprocess.run(
+        [
+            sys.executable,
+            str(BASE / "resolve_research.py"),
+            "--archive",
+            r"D:\2026_APPs by AI\_research_archive",
+            "--variant",
+            "all",
+            "--limit",
+            "200",
+            "--sleep",
+            "0.1",
+        ]
+    )
+    rc = rc or resolve.returncode
     return rc
 
 
