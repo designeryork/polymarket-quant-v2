@@ -3823,23 +3823,18 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
       </div>
     </div>
     <div class="header-meta">
+      <div id="research-progress" style="display:none;min-width:172px;max-width:230px;padding:6px 10px;border:1px solid var(--border);border-radius:10px;background:var(--card-raised);text-align:right">
+        <div style="font-size:9px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase">Research gate · 1,000</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-top:1px"><span id="rp-resolved">—</span><span style="font-size:10px;color:var(--muted);font-weight:400"> / 1,000</span></div>
+        <div style="height:4px;background:var(--card);border-radius:99px;margin-top:5px;overflow:hidden"><div id="rp-bar" style="height:4px;width:0;background:linear-gradient(90deg,#34d399,#7dd3fc);border-radius:99px;transition:width .4s"></div></div>
+        <div id="rp-meta" style="font-size:9px;color:var(--muted);margin-top:4px">等待 research_status.json…</div>
+      </div>
       <div class="wallet"><span class="meta-label">专属钱包</span><code title="{state['wallet_address'] or '纸面模拟，不连接钱包'}">{state['wallet_address'] or '纸面模拟 · 无钱包'}</code></div>
       <div><span class="meta-label">最后更新 · 15 秒自动刷新</span><div class="updated-time">{state['last_updated']}</div></div>
     </div>
   </header>
 
   <div class="notice-stack">{status_strip}{error_notice}</div>
-
-  <section id="research-progress" style="display:none;margin:10px 0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:10px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase">Research gate · 1,000 resolved tokens</div>
-        <div style="font-size:20px;font-weight:700;color:var(--text);margin-top:2px"><span id="rp-resolved">—</span><span style="font-size:12px;color:var(--muted);font-weight:400"> / 1,000</span></div>
-      </div>
-      <div id="rp-meta" style="font-size:10px;color:var(--muted);text-align:right">等待 research_status.json…</div>
-    </div>
-    <div style="height:6px;background:var(--card-raised);border-radius:99px;margin-top:10px;overflow:hidden"><div id="rp-bar" style="height:6px;width:0;background:linear-gradient(90deg,#34d399,#7dd3fc);border-radius:99px;transition:width .4s"></div></div>
-  </section>
 
   <section class="kpi-grid" aria-label="账户概览">
     <div class="kpi-card">
@@ -4041,9 +4036,9 @@ def generate_dashboard_html(state: Dict[str, Any], mode_key: Optional[str] = Non
     document.getElementById('rp-resolved').textContent = resolved;
     document.getElementById('rp-bar').style.width = pct.toFixed(1) + '%';
     var fmt = function(v) {{ return (v === undefined || v === null) ? '—' : v; }};
-    document.getElementById('rp-meta').textContent =
-      'v1 ' + fmt(d.v1_resolved) + ' · v2 ' + fmt(d.v2_resolved) +
-      ' · EVAL ' + fmt(d.eval_records) + ' · ' + (d.generated_at || '');
+    var meta = document.getElementById('rp-meta');
+    meta.textContent = 'v1 ' + fmt(d.v1_resolved) + ' · v2 ' + fmt(d.v2_resolved) + ' · ' + pct.toFixed(1) + '%';
+    meta.title = 'EVAL ' + fmt(d.eval_records) + ' · ' + (d.generated_at || '');
   }}
   fetch('research_status.json', {{cache: 'no-store'}})
     .then(function(r) {{ return r.ok ? r.json() : null; }})
