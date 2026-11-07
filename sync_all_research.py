@@ -56,6 +56,22 @@ def main() -> int:
         ]
     )
     rc = rc or resolve.returncode
+
+    # Phase 2.2: daily calibration report after resolution updates.
+    print("== daily metrics", flush=True)
+    metrics = subprocess.run(
+        [
+            sys.executable,
+            str(BASE / "daily_metrics.py"),
+            "--archive",
+            r"D:\2026_APPs by AI\_research_archive",
+            "--variant",
+            "all",
+            "--bootstrap",
+            "2000",
+        ]
+    )
+    rc = rc or metrics.returncode
     return rc
 
 
