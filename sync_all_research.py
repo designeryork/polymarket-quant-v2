@@ -39,6 +39,14 @@ def main() -> int:
         )
         rc = rc or result.returncode
 
+    # Flow-shadow is a separate forward-only data branch; sync it too.
+    print("== sync flow shadow", flush=True)
+    flow_sync = subprocess.run(
+        [sys.executable, str(BASE / "sync_flow_shadow.py")]
+    )
+    if flow_sync.returncode != 0:
+        print("[sync_all_research] flow-shadow sync failed (ignored)", flush=True)
+
     # Phase 2.1: resolve every archived EVAL token to 1/0 after syncing.
     # --limit 0 covers all unresolved tokens, so nothing is permanently skipped.
     print("== resolve research tokens", flush=True)
@@ -87,6 +95,19 @@ def main() -> int:
         ]
     )
     rc = rc or ab.returncode
+
+    # Flow-shadow pre-registered report (only meaningful after 300 resolved).
+    print("== flow shadow report", flush=True)
+    flow_report = subprocess.run(
+        [
+            sys.executable,
+            str(BASE / "flow_shadow_report.py"),
+            "--bootstrap",
+            "2000",
+        ]
+    )
+    if flow_report.returncode != 0:
+        print("[sync_all_research] flow-shadow report failed (ignored)", flush=True)
 
     # Publish research progress to gh-pages for the dashboard panel.
     print("== research status", flush=True)
