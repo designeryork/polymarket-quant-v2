@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-11T02:32:26.597727+00:00",
-  "run_id": "42946586993",
-  "elapsed_seconds": 51.76,
-  "universe_markets": 1651,
-  "universe_discovered_at": "2026-11-11T02:31:41.270945+00:00",
+  "generated_at": "2026-11-11T02:38:34.361778+00:00",
+  "run_id": "42947291708",
+  "elapsed_seconds": 54.59,
+  "universe_markets": 1639,
+  "universe_discovered_at": "2026-11-11T02:37:46.745404+00:00",
   "selected_markets": 60,
   "rows": 51,
   "errors": [
@@ -55,6 +55,6 @@
       60
     ]
   },
-  "jsonl": "state/flow_shadow/flow_shadow_2026-11-11T02-32-26Z_42946586993.jsonl",
-  "jsonl_branch_path": "flow_shadow/observations/2026-11-11/flow_shadow_2026-11-11T02-32-26Z_42946586993.jsonl"
+  "jsonl": "state/flow_shadow/flow_shadow_2026-11-11T02-38-34Z_42947291708.jsonl",
+  "jsonl_branch_path": "flow_shadow/observations/2026-11-11/flow_shadow_2026-11-11T02-38-34Z_42947291708.jsonl"
 }
