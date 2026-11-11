@@ -1,0 +1,89 @@
+name: Flow Shadow Collector (Read-only)
+
+# 前瞻式成交流/盘口影子采集。只读公开 API，不读私钥、不下单、不改引擎。
+#
+# 每 30 分钟记录一次：
+#   * Gamma 市场元数据；
+#   * CLOB YES/NO 最优买卖价与 2 美分内深度；
+#   * 最近 5/15/60 分钟公开成交，归一化为 YES 等价成交流。
+#
+# 数据写到独立分支 flow-shadow（不是 gh-pages，也不是 state-snapshot），
+# 同时上传 artifact 备份。预注册规则见 Docs/062。
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: '每轮最多采集多少个市场'
+        required: false
+        default: '60'
+      min_hours:
+        description: '距结束最少小时数'
+        required: false
+        default: '2'
+      max_hours:
+        description: '距结束最多小时数'
+        required: false
+        default: '168'
+
+concurrency:
+  group: flow-shadow-collector
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ALLOW_DIRECT: 'true'
+      PYTHONUNBUFFERED: '1'
+      FLOW_LIMIT: ${{ github.event.inputs.limit || '60' }}
+      FLOW_MIN_HOURS: ${{ github.event.inputs.min_hours || '2' }}
+      FLOW_MAX_HOURS: ${{ github.event.inputs.max_hours || '168' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Collect Flow Shadow
+        run: |
+          mkdir -p state/flow_shadow
+          python flow_shadow.py \
+            --limit "$FLOW_LIMIT" \
+            --min-hours "$FLOW_MIN_HOURS" \
+            --max-hours "$FLOW_MAX_HOURS" \
+            --out-dir state/flow_shadow \
+            --run-id "${{ github.run_id }}"
+
+      - name: Publish To flow-shadow Branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python publish_flow_shadow.py --data-dir state/flow_shadow
+
+      - name: Upload Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flow-shadow-${{ github.run_id }}
+          path: |
+            state/flow_shadow/flow_shadow_*.jsonl
+            state/flow_shadow/flow_shadow_*.meta.json
+          retention-days: 30
+          if-no-files-found: warn
