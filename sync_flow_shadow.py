@@ -46,27 +46,35 @@ def main() -> int:
     url = f"https://github.com/{args.repo}.git"
     with tempfile.TemporaryDirectory(prefix="flow-shadow-sync-") as tmp:
         work = Path(tmp) / "repo"
-        clone = run(
-            [
-                "git",
-                "-c",
-                "http.proxy=",
-                "-c",
-                "https.proxy=",
-                "clone",
-                "--depth",
-                "1",
-                "--branch",
-                args.branch,
-                url,
-                str(work),
-            ]
-        )
-        if clone.returncode != 0:
+        attempts = [
+            ["-c", "http.proxy=", "-c", "https.proxy="],
+            ["-c", "http.proxy=http://127.0.0.1:7890", "-c", "https.proxy=http://127.0.0.1:7890"],
+        ]
+        clone = None
+        for config in attempts:
+            shutil.rmtree(work, ignore_errors=True)
+            clone = run(
+                [
+                    "git",
+                    *config,
+                    "clone",
+                    "--depth",
+                    "1",
+                    "--branch",
+                    args.branch,
+                    url,
+                    str(work),
+                ],
+                timeout=120,
+            )
+            if clone.returncode == 0:
+                break
             print(
-                f"[sync_flow_shadow] branch unavailable: {(clone.stderr or '').strip()[:300]}",
+                f"[sync_flow_shadow] clone attempt failed: {(clone.stderr or '').strip()[:200]}",
                 flush=True,
             )
+        if clone is None or clone.returncode != 0:
+            print("[sync_flow_shadow] branch unavailable after retries", flush=True)
             return 0
         source = work / "flow_shadow" / "observations"
         if not source.exists():
