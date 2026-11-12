@@ -1,12 +1,20 @@
 {
-  "generated_at": "2026-11-12T01:26:15.965258+00:00",
-  "run_id": "43134381158",
-  "elapsed_seconds": 51.21,
-  "universe_markets": 1607,
-  "universe_discovered_at": "2026-11-12T01:25:30.763430+00:00",
+  "generated_at": "2026-11-12T08:47:42.370163+00:00",
+  "run_id": "43185726188",
+  "elapsed_seconds": 51.02,
+  "universe_markets": 1975,
+  "universe_discovered_at": "2026-11-12T08:46:58.596467+00:00",
   "selected_markets": 60,
-  "rows": 58,
+  "rows": 56,
   "errors": [
+    {
+      "condition_id": "0x2747b06126dcc29805d43dfbe83834700b280d804b78b710502b46f9b71198f8",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0x003716fa00378b61632ab7f44d281c3036e6fd393ced4d7655103395e2d1ee3f",
+      "error": "book_unavailable"
+    },
     {
       "condition_id": "0x9576d5904426d51cb735797ffcc0e20598970c968d98fd1dbd70561a86c0988a",
       "error": "book_unavailable"
@@ -27,6 +35,6 @@
       60
     ]
   },
-  "jsonl": "state/flow_shadow/flow_shadow_2026-11-12T01-26-15Z_43134381158.jsonl",
-  "jsonl_branch_path": "flow_shadow/observations/2026-11-12/flow_shadow_2026-11-12T01-26-15Z_43134381158.jsonl"
+  "jsonl": "state/flow_shadow/flow_shadow_2026-11-12T08-47-42Z_43185726188.jsonl",
+  "jsonl_branch_path": "flow_shadow/observations/2026-11-12/flow_shadow_2026-11-12T08-47-42Z_43185726188.jsonl"
 }
