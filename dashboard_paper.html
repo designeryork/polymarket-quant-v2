@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polymarket · 纸盘 v2 · v2.0-measure</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzM0ZDM5OSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA0Nzg1NyIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgo8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCNnKSIvPgo8cG9seWxpbmUgcG9pbnRzPSIxMiw0NCAyNCwzMyAzNCwzOSA1MCwyMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjBmZGY0IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8Y2lyY2xlIGN4PSI1MCIgY3k9IjIxIiByPSI2LjUiIGZpbGw9IiNmYmJmMjQiIHN0cm9rZT0iIzA2NWY0NiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPg==">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #090d14; --card: #111823; --card-raised: #151e2b; --border: #233042;
+    --text: #edf3fa; --muted: #8492a6; --faint: #59687c; --accent: #7dd3fc;
+    --green: #34d399; --red: #fb7185; --orange: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: Inter, "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden; line-height: 1.45;
+    font-size: 13px; -webkit-font-smoothing: antialiased;
+  }
+  button, input, table { font: inherit; }
+  code, .kpi-val, td, .updated-time { font-variant-numeric: tabular-nums; }
+  .app-shell {
+    height: 100dvh; max-width: 2200px; margin: 0 auto; padding: 16px 18px;
+    display: grid; grid-template-rows: auto auto auto minmax(0, 1fr); gap: 12px;
+  }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 46px; }
+  .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .brand-mark {
+    width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center;
+    border: 1px solid #38536c; border-radius: 11px; background: #132333;
+    color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: -.03em;
+  }
+  .title-line { display: flex; align-items: center; gap: 10px; }
+  h1 { font-size: 18px; line-height: 1.2; letter-spacing: -.025em; font-weight: 700; }
+  .brand-subtitle { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .mode-pill {
+    display: inline-flex; align-items: center; gap: 6px; max-width: 260px;
+    padding: 3px 8px; border: 1px solid #285846; border-radius: 999px;
+    background: rgba(52, 211, 153, .07); color: #6ee7b7;
+    font-size: 10px; font-weight: 700; letter-spacing: .03em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mode-pill::before { content: ""; width: 5px; height: 5px; flex: 0 0 auto; border-radius: 50%; background: var(--green); }
+  .header-meta { display: flex; align-items: center; gap: 22px; text-align: right; }
+  .wallet { max-width: 210px; }
+  .meta-label { display: block; color: var(--faint); font-size: 10px; margin-bottom: 3px; }
+  .wallet code { display: block; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .updated-time { color: #c9d4e2; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .notice-stack { display: grid; gap: 6px; }
+  .notice-stack:empty { display: none; }
+  .system-banner {
+    min-height: 34px; display: flex; align-items: center; gap: 9px; padding: 7px 11px;
+    border: 1px solid var(--border); border-radius: 9px; background: var(--card);
+    color: var(--muted); font-size: 11px;
+  }
+  .system-banner strong { color: var(--text); font-size: 11px; white-space: nowrap; }
+  .system-banner > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .banner-dot { width: 6px; height: 6px; flex: 0 0 auto; border-radius: 50%; background: var(--muted); }
+  .system-banner.success { border-color: rgba(52, 211, 153, .24); background: rgba(52, 211, 153, .045); }
+  .system-banner.success .banner-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(52, 211, 153, .08); }
+  .system-banner.success strong { color: #6ee7b7; }
+  .system-banner.warning { border-color: rgba(251, 191, 36, .28); background: rgba(251, 191, 36, .05); }
+  .system-banner.warning .banner-dot { background: var(--orange); }
+  .system-banner.warning strong { color: #fcd34d; }
+  .system-banner.danger { border-color: rgba(251, 113, 133, .32); background: rgba(251, 113, 133, .06); }
+  .system-banner.danger .banner-dot { background: var(--red); }
+  .system-banner.danger strong { color: #fda4af; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .kpi-card {
+    position: relative; min-width: 0; padding: 12px 14px;
+    border: 1px solid var(--border); border-radius: 12px; background: var(--card);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+  }
+  .kpi-card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 2px; border-radius: 12px 0 0 12px; background: #2c3d50; }
+  .kpi-card:first-child::before { background: var(--green); }
+  .kpi-label { display: flex; justify-content: space-between; gap: 8px; color: #a6b3c3; font-size: 11px; }
+  .kpi-english { color: var(--faint); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+  .kpi-val { margin-top: 4px; color: var(--text); font-size: 25px; line-height: 1.15; font-weight: 700; letter-spacing: -.035em; white-space: nowrap; }
+  .kpi-val small { color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: 0; }
+  .kpi-sub { margin-top: 5px; color: var(--muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .workspace {
+    min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 12px;
+  }
+  .signals-wide { grid-column: 2 / -1; }
+  .panel {
+    min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+    border: 1px solid var(--border); border-radius: 13px; background: var(--card);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .09);
+  }
+  .panel-header {
+    flex: 0 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    padding: 12px 14px 10px; border-bottom: 1px solid rgba(35, 48, 66, .7);
+  }
+  .panel-header h2 { color: #dce6f1; font-size: 12px; font-weight: 650; letter-spacing: .01em; }
+  .panel-header p { margin-top: 2px; color: var(--faint); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; }
+  .panel-meta { flex: 0 0 auto; color: var(--muted); font-size: 10px; white-space: nowrap; }
+  .panel-note { flex: 0 0 auto; padding: 8px 14px; color: var(--muted); font-size: 10px; border-bottom: 1px solid rgba(35, 48, 66, .55); }
+  .scroll-region { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+  .scroll-region:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .scroll-region::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scroll-region::-webkit-scrollbar-track { background: transparent; }
+  .scroll-region::-webkit-scrollbar-thumb { background: #2b3a4d; border: 2px solid var(--card); border-radius: 8px; }
+  .scroll-region::-webkit-scrollbar-thumb:hover { background: #3b4f66; }
+  .chart-wrap { flex: 1; min-height: 0; padding: 10px 12px 12px; }
+  .chart-wrap svg { display: block; width: 100%; height: 100%; min-height: 150px; }
+  .gran-tabs { flex: 0 0 auto; display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 8px; background: #0b1220; }
+  .gran-tabs button { appearance: none; border: 0; background: transparent; color: var(--muted); font-family: inherit; font-size: 10px; line-height: 1; padding: 5px 9px; border-radius: 6px; cursor: pointer; transition: background .15s ease, color .15s ease; }
+  .gran-tabs button:hover { color: #dce6f1; }
+  .gran-tabs button[aria-selected="true"] { background: rgba(56, 189, 248, .16); color: #7dd3fc; }
+  .mode-tabs { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 8px; background: #0b1220; }
+  .mode-tabs a { text-decoration: none; color: var(--muted); font-size: 10px; line-height: 1; padding: 4px 9px; border-radius: 6px; }
+  .mode-tabs a:hover { color: #dce6f1; }
+  .mode-tabs a.active { background: rgba(56, 189, 248, .16); color: #7dd3fc; }
+  .mode-tabs a.dim { opacity: .42; }
+  .chart-view { height: 100%; }
+  .chart-view[hidden] { display: none; }
+  .chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; min-height: 150px; color: var(--muted); font-size: 11px; }
+  .chart-dot { opacity: .92; }
+  .data-stale .kpi-card, .data-stale .panel { opacity: .78; }
+  .chart-hit { cursor: crosshair; }
+  .chart-tip {
+    position: fixed; z-index: 60; pointer-events: none; padding: 6px 9px; border-radius: 8px;
+    background: rgba(9, 15, 26, .97); border: 1px solid #2b3a4d; box-shadow: 0 10px 26px rgba(0, 0, 0, .5);
+    color: #bac7d5; font-size: 10px; line-height: 1.5; white-space: nowrap;
+    transform: translate(-50%, -100%);
+  }
+  .chart-tip b { display: block; color: #7dd3fc; font-size: 12px; font-weight: 650; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; color: #bac7d5; font-size: 11px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid rgba(35, 48, 66, .75); text-align: left; vertical-align: middle; white-space: nowrap; }
+  th { position: sticky; top: 0; z-index: 2; background: var(--card-raised); color: #7f90a5; font-size: 10px; font-weight: 600; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td .sub { display: inline; }
+  .positions-table { min-width: 1250px; }
+  .orders-table { min-width: 900px; }
+  .closed-table { min-width: 1000px; }
+  .signals-table { min-width: 830px; }
+  .q-cell { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pos { color: var(--green); font-weight: 650; }
+  .neg { color: var(--red); font-weight: 650; }
+  .sub { color: var(--muted); font-size: 10px; }
+  code { color: #9fb2c8; font-family: "SFMono-Regular", Consolas, monospace; font-size: 10px; }
+  .badge {
+    display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 5px;
+    background: #263447; color: #d3deea; font-size: 9px; font-weight: 700; line-height: 1.5;
+  }
+  .badge-side { background: rgba(125, 211, 252, .1); color: var(--accent); }
+  .badge-buy { background: rgba(52, 211, 153, .1); color: #6ee7b7; }
+  .badge-skip { background: rgba(132, 146, 166, .1); color: #9aaabc; }
+  .badge-error { background: rgba(251, 191, 36, .1); color: #fcd34d; }
+  .cat {
+    display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 5px;
+    font-size: 9px; font-weight: 700; line-height: 1.6; white-space: nowrap;
+    background: rgba(148, 163, 184, .12); color: #9aaabc;
+  }
+  .cat-politics { background: rgba(96, 165, 250, .12); color: #93c5fd; }
+  .cat-sports { background: rgba(52, 211, 153, .12); color: #6ee7b7; }
+  .cat-esports { background: rgba(192, 132, 252, .14); color: #d8b4fe; }
+  .cat-weather { background: rgba(34, 211, 238, .12); color: #67e8f9; }
+  .cat-crypto { background: rgba(251, 191, 36, .12); color: #fcd34d; }
+  .cat-finance { background: rgba(45, 212, 191, .12); color: #5eead4; }
+  .cat-tech { background: rgba(129, 140, 248, .14); color: #a5b4fc; }
+  .cat-ent { background: rgba(244, 114, 182, .12); color: #f9a8d4; }
+  .cat-other { background: rgba(148, 163, 184, .1); color: #94a3b8; }
+  .error-panel { border-color: rgba(251, 191, 36, .25); }
+  .error-list { padding: 0 12px 10px; }
+  .error-item { border-bottom: 1px solid rgba(35, 48, 66, .7); }
+  .error-item summary {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
+    padding: 10px 2px; cursor: pointer; list-style: none;
+  }
+  .error-item summary::-webkit-details-marker { display: none; }
+  .error-item summary::after { content: "+"; grid-column: 3; grid-row: 1 / span 2; color: var(--faint); font-size: 15px; }
+  .error-item[open] summary::after { content: "−"; }
+  .error-summary { min-width: 0; display: flex; align-items: baseline; gap: 7px; }
+  .error-summary strong { flex: 0 0 auto; color: #fcd34d; font-size: 10px; }
+  .error-summary > span { color: #aebdce; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .error-item time { grid-column: 2; color: var(--faint); font-size: 9px; }
+  .error-body { margin: 0 0 10px; padding: 10px; border-radius: 8px; background: #0c121b; color: #aebdce; font-size: 10px; overflow-wrap: anywhere; }
+  .error-record-meta { margin-bottom: 8px; color: var(--faint); }
+  .error-detail { color: #d2dce8; white-space: normal; }
+  .error-context, .error-handling { margin-top: 8px; }
+  .error-context strong, .error-handling strong { display: block; margin-bottom: 2px; color: #8492a6; }
+  .status-strip {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 2px 9px;
+    min-height: 34px; padding: 7px 11px; border: 1px solid var(--border); border-radius: 9px;
+    background: var(--card); color: var(--muted); font-size: 11px;
+  }
+  .status-strip strong { color: var(--text); font-size: 11px; white-space: nowrap; }
+  .status-headline { flex: 0 1 auto; min-width: 0; max-width: 52ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .status-strip.success { border-color: rgba(52, 211, 153, .24); background: rgba(52, 211, 153, .045); }
+  .status-strip.success .banner-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(52, 211, 153, .08); }
+  .status-strip.success strong { color: #6ee7b7; }
+  .status-strip.paper { border-color: rgba(56, 189, 248, .28); background: rgba(56, 189, 248, .05); }
+  .status-strip.paper .banner-dot { background: var(--accent); }
+  .status-strip.paper strong { color: #7dd3fc; }
+  .status-flag { flex: 0 0 auto; padding: 1px 7px; border-radius: 999px; border: 1px solid rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .08); color: #fcd34d; font-size: 9px; white-space: nowrap; }
+  .status-strip.warning { border-color: rgba(251, 191, 36, .28); background: rgba(251, 191, 36, .05); }
+  .status-strip.warning .banner-dot { background: var(--orange); }
+  .status-strip.warning strong { color: #fcd34d; }
+  .status-strip.danger { border-color: rgba(251, 113, 133, .32); background: rgba(251, 113, 133, .06); }
+  .status-strip.danger .banner-dot { background: var(--red); }
+  .status-strip.danger strong { color: #fda4af; }
+  .status-meta {
+    flex: 1 1 auto; min-width: 0; margin-left: auto;
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: 2px 16px;
+  }
+  .status-meta > span { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; font-size: 10px; }
+  .status-meta b { flex: 0 0 auto; color: #91a5bb; font-weight: 600; white-space: nowrap; }
+  .status-meta .status-text { min-width: 0; max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (hover: hover) and (pointer: fine) {
+    tbody tr:hover td { background: rgba(125, 211, 252, .025); }
+    .error-item summary:hover .error-summary > span { color: var(--text); }
+  }
+  @media (min-width: 1001px) and (max-height: 800px) {
+    .app-shell { padding: 10px 12px; gap: 8px; }
+    .topbar { min-height: 38px; }
+    .brand-mark { width: 34px; height: 34px; }
+    .brand-subtitle { display: none; }
+    .kpi-grid, .workspace { gap: 8px; }
+    .kpi-card { padding: 9px 12px; }
+    .kpi-val { font-size: 22px; }
+    .panel-header { padding: 9px 12px 8px; }
+    .panel-note { padding: 6px 12px; }
+  }
+  @media (max-width: 1180px) {
+    .kpi-english { display: none; }
+    .wallet { display: none; }
+  }
+  @media (max-width: 1000px) {
+    body { overflow: auto; }
+    .app-shell { height: auto; min-height: 100dvh; }
+    .workspace { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 360px; }
+    .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 680px) {
+    .app-shell { padding: 12px; gap: 10px; }
+    .topbar { align-items: flex-start; gap: 12px; }
+    .header-meta { gap: 0; }
+    .updated-time { font-size: 10px; white-space: normal; }
+    .mode-pill { max-width: 140px; }
+    .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .kpi-card:last-child { grid-column: 1 / -1; }
+    .workspace { grid-template-columns: 1fr; grid-auto-rows: 380px; gap: 10px; }
+    .signals-wide { grid-column: 1 / -1; }
+    .system-banner { align-items: flex-start; flex-wrap: wrap; }
+    .system-banner > span:last-child { width: 100%; white-space: normal; }
+    .status-strip { align-items: flex-start; }
+    .status-headline { max-width: 100%; white-space: normal; }
+    .status-meta { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body data-generated-at="2026-11-14T15:00:22.178526+00:00">
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">PM</div>
+      <div>
+        <div class="title-line"><h1>Polymarket</h1><span class="mode-pill">PAPER (模拟实盘盘口撮合)</span><span class="mode-pill">纸盘 v2 · v2.0-measure</span><span class="mode-tabs" role="group" aria-label="面板切换"><a class="dim" href="dashboard.html">实盘</a><a class="active" href="dashboard_paper.html">纸面</a><a class="" href="dashboard_hedge.html">对冲</a><a class="" href="dashboard_reverse.html">反向持有</a><a class="" href="dashboard_maker.html">反向挂单</a><a href="copy.html">跟单纸盘</a><a href="parity.html" target="_blank" rel="noopener" title="只读平价/事件篮子扫描">平价扫描</a></span></div>
+        <div class="brand-subtitle">量化交易监控终端 · 纸盘 v2 · v2.0-measure · Best Bid 真实盘口计价</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div id="research-progress" style="display:none;min-width:172px;max-width:230px;padding:6px 10px;border:1px solid var(--border);border-radius:10px;background:var(--card-raised);text-align:right">
+        <div style="font-size:9px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase">Research gate · 1,000</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-top:1px"><span id="rp-resolved">—</span><span style="font-size:10px;color:var(--muted);font-weight:400"> / 1,000</span></div>
+        <div style="height:4px;background:var(--card);border-radius:99px;margin-top:5px;overflow:hidden"><div id="rp-bar" style="height:4px;width:0;background:linear-gradient(90deg,#34d399,#7dd3fc);border-radius:99px;transition:width .4s"></div></div>
+        <div id="rp-meta" style="font-size:9px;color:var(--muted);margin-top:4px">等待 research_status.json…</div>
+      </div>
+      <div class="wallet"><span class="meta-label">专属钱包</span><code title="纸面模拟，不连接钱包">纸面模拟 · 无钱包</code></div>
+      <div><span class="meta-label">最后更新 · 30 秒检查更新</span><div class="updated-time">2026-11-14 15:00:22 UTC</div></div>
+    </div>
+  </header>
+
+  <div class="notice-stack">
+      <div class="status-strip paper" role="status">
+        <span class="banner-dot"></span>
+        <strong>纸面模式运行中</strong>
+
+        <span class="status-headline" title="模拟撮合 · 不参与链上对账 · 成交价按真实买一卖一">模拟撮合 · 不参与链上对账 · 成交价按真实买一卖一</span>
+
+        <div class="status-meta">
+          <span><b>单实例锁</b><span class="status-text" title="不适用（纸面 / 对冲模式不申请单实例锁）">不适用（纸面 / 对冲模式不申请单实例锁）</span></span>
+          <span><b>在途名义</b>买 $0.00 · 卖 $0.00</span>
+          <span><b>网络通道</b><span class="status-text" title="direct://（来源：显式直连（ALLOW_DIRECT=true），延迟 0.14s） · 出口信息未知">direct://（来源：显式直连（ALLOW_DIRECT=true），延迟 0.14s） · 出口信息未知</span></span>
+          <span><b>限流保护</b>Retry-After 退避 · 指数退避 · 巡检抖动</span>
+          <span><b>网络健康</b><span class="status-text" title="最近 20 次请求的成功率；网络不稳时系统会自动收缩每轮扫描量">healthy · 成功率 100% (最近 20 次请求)</span></span>
+        </div>
+      </div></div>
+
+  <section class="kpi-grid" aria-label="账户概览">
+    <div class="kpi-card">
+      <div class="kpi-label"><span>账户总净值</span><span class="kpi-english">Equity</span></div>
+      <div class="kpi-val" style="color:#f43f5e;">$95.14</div>
+      <div class="kpi-sub">本金 $100.00 · 回报 -4.86%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>总盈亏</span><span class="kpi-english">Total PnL</span></div>
+      <div class="kpi-val" style="color:#f43f5e;">$-4.86</div>
+      <div class="kpi-sub">已实现 $-3.95 · 浮动 $-0.90</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>可用现金</span><span class="kpi-english">Cash</span></div>
+      <div class="kpi-val">$89.87</div>
+      <div class="kpi-sub">单笔上限 $2.00 · 1/4 凯利 · 最小 $1.00</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>当前持仓</span><span class="kpi-english">Positions</span></div>
+      <div class="kpi-val">4 <small>/ 4</small></div>
+      <div class="kpi-sub">同一事件互斥锁已开启</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>扫描与过滤</span><span class="kpi-english">Activity</span></div>
+      <div class="kpi-val">20 <small>笔成交</small></div>
+      <div class="kpi-sub">537,426 次评估 · 537,406 次跳过</div>
+      <div class="kpi-sub" style="margin-top:6px;">全宇宙 1714 个 · 累计扫描 1848 个 · 平均每轮 59 个 · 窗口 limit=60 offset=360</div>
+    </div>
+  </section>
+
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-header">
+        <div><h2>账户净值走势</h2><p>Equity curve · portfolio.json</p></div>
+        <div class="gran-tabs" role="tablist" aria-label="净值时间粒度"><button type="button" role="tab" data-gran-tab="year" aria-selected="false" title="最近 365 天 · 自动选择粒度，最多 150 点">年</button><button type="button" role="tab" data-gran-tab="month" aria-selected="false" title="最近 30 天 · 自动选择粒度，最多 150 点">月</button><button type="button" role="tab" data-gran-tab="day" aria-selected="false" title="最近 24 小时 · 自动选择粒度，最多 150 点">日</button><button type="button" role="tab" data-gran-tab="hour" aria-selected="true" title="最近 2 小时 · 原始巡检点">时</button></div>
+      </div>
+      <div class="chart-wrap"><div class="chart-view" data-gran-view="year" hidden><svg viewBox="0 0 900 260" width="100%" height="260" preserveAspectRatio="none" role="img" aria-label="equity curve"><rect x="0" y="0" width="900" height="260" fill="#0b1220" rx="8"/><line x1="48" y1="224.0" x2="884" y2="224.0" stroke="#334155" stroke-width="1"/><text x="42" y="228.0" text-anchor="end" fill="#94a3b8" font-size="11">$94.19</text><line x1="48" y1="172.0" x2="884" y2="172.0" stroke="#334155" stroke-width="1"/><text x="42" y="176.0" text-anchor="end" fill="#94a3b8" font-size="11">$94.63</text><line x1="48" y1="120.0" x2="884" y2="120.0" stroke="#334155" stroke-width="1"/><text x="42" y="124.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.06</text><line x1="48" y1="68.0" x2="884" y2="68.0" stroke="#334155" stroke-width="1"/><text x="42" y="72.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.50</text><line x1="48" y1="16.0" x2="884" y2="16.0" stroke="#334155" stroke-width="1"/><text x="42" y="20.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.94</text><polyline fill="#10b98133" stroke="none" points="48.0,224.0 48.0,209.7 60.3,209.7 72.6,209.7 84.9,30.3 97.2,30.3 109.5,30.3 121.8,30.3 134.1,53.7 146.4,83.1 158.6,83.1 170.9,100.6 183.2,100.6 195.5,110.7 207.8,110.7 220.1,110.7 232.4,110.7 244.7,110.7 257.0,110.7 269.3,110.7 281.6,110.7 293.9,110.7 306.2,110.7 318.5,110.7 330.8,98.9 343.1,69.4 355.4,69.4 367.6,69.4 379.9,75.3 392.2,98.9 404.5,98.9 416.8,98.9 429.1,98.9 441.4,110.5 453.7,92.8 466.0,57.3 478.3,57.3 490.6,81.0 502.9,81.0 515.2,81.0 527.5,81.0 539.8,81.0 552.1,81.0 564.4,75.1 576.6,75.1 588.9,75.1 601.2,75.1 613.5,75.1 625.8,75.1 638.1,75.1 650.4,75.1 662.7,75.1 675.0,75.1 687.3,87.0 699.6,87.0 711.9,87.0 724.2,87.0 736.5,87.0 748.8,87.0 761.1,87.0 773.4,87.0 785.6,87.0 797.9,87.0 810.2,81.1 822.5,81.1 834.8,81.1 847.1,104.8 859.4,104.8 871.7,110.8 884.0,110.8 884.0,224.0"></polyline><polyline fill="none" stroke="#10b981" stroke-width="2.5" points="48.0,209.7 60.3,209.7 72.6,209.7 84.9,30.3 97.2,30.3 109.5,30.3 121.8,30.3 134.1,53.7 146.4,83.1 158.6,83.1 170.9,100.6 183.2,100.6 195.5,110.7 207.8,110.7 220.1,110.7 232.4,110.7 244.7,110.7 257.0,110.7 269.3,110.7 281.6,110.7 293.9,110.7 306.2,110.7 318.5,110.7 330.8,98.9 343.1,69.4 355.4,69.4 367.6,69.4 379.9,75.3 392.2,98.9 404.5,98.9 416.8,98.9 429.1,98.9 441.4,110.5 453.7,92.8 466.0,57.3 478.3,57.3 490.6,81.0 502.9,81.0 515.2,81.0 527.5,81.0 539.8,81.0 552.1,81.0 564.4,75.1 576.6,75.1 588.9,75.1 601.2,75.1 613.5,75.1 625.8,75.1 638.1,75.1 650.4,75.1 662.7,75.1 675.0,75.1 687.3,87.0 699.6,87.0 711.9,87.0 724.2,87.0 736.5,87.0 748.8,87.0 761.1,87.0 773.4,87.0 785.6,87.0 797.9,87.0 810.2,81.1 822.5,81.1 834.8,81.1 847.1,104.8 859.4,104.8 871.7,110.8 884.0,110.8"></polyline><circle class="chart-dot" cx="48.0" cy="209.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="60.3" cy="209.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="72.6" cy="209.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="84.9" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="97.2" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="109.5" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="121.8" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="134.1" cy="53.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="146.4" cy="83.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="158.6" cy="83.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="170.9" cy="100.6" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="183.2" cy="100.6" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="195.5" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="207.8" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="220.1" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="232.4" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="244.7" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="257.0" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="269.3" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="281.6" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="293.9" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="306.2" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="318.5" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="330.8" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="343.1" cy="69.4" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="355.4" cy="69.4" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="367.6" cy="69.4" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="379.9" cy="75.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="392.2" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="404.5" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="416.8" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="429.1" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="441.4" cy="110.5" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="453.7" cy="92.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="466.0" cy="57.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="478.3" cy="57.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="490.6" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="502.9" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="515.2" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="527.5" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="539.8" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="552.1" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="564.4" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="576.6" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="588.9" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="601.2" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="613.5" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="625.8" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="638.1" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="650.4" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="662.7" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="675.0" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="687.3" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="699.6" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="711.9" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="724.2" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="736.5" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="748.8" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="761.1" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="773.4" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="785.6" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="797.9" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="810.2" cy="81.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="822.5" cy="81.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="834.8" cy="81.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="847.1" cy="104.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="859.4" cy="104.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="871.7" cy="110.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="884.0" cy="110.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-hit" cx="48.0" cy="209.7" r="6.1" fill="transparent" pointer-events="all" data-value="$94.31" data-tip="2026-11-11 19:58:57" /><circle class="chart-hit" cx="60.3" cy="209.7" r="6.1" fill="transparent" pointer-events="all" data-value="$94.31" data-tip="2026-11-11 20:59:26" /><circle class="chart-hit" cx="72.6" cy="209.7" r="6.1" fill="transparent" pointer-events="all" data-value="$94.31" data-tip="2026-11-11 21:59:43" /><circle class="chart-hit" cx="84.9" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-11 22:59:47" /><circle class="chart-hit" cx="97.2" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-11 23:59:03" /><circle class="chart-hit" cx="109.5" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-12 00:59:32" /><circle class="chart-hit" cx="121.8" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-12 01:59:30" /><circle class="chart-hit" cx="134.1" cy="53.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.62" data-tip="2026-11-12 02:59:51" /><circle class="chart-hit" cx="146.4" cy="83.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.37" data-tip="2026-11-12 03:59:05" /><circle class="chart-hit" cx="158.6" cy="83.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.37" data-tip="2026-11-12 04:58:57" /><circle class="chart-hit" cx="170.9" cy="100.6" r="6.1" fill="transparent" pointer-events="all" data-value="$95.23" data-tip="2026-11-12 05:59:38" /><circle class="chart-hit" cx="183.2" cy="100.6" r="6.1" fill="transparent" pointer-events="all" data-value="$95.23" data-tip="2026-11-12 06:59:04" /><circle class="chart-hit" cx="195.5" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 07:59:34" /><circle class="chart-hit" cx="207.8" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 08:58:53" /><circle class="chart-hit" cx="220.1" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 09:59:36" /><circle class="chart-hit" cx="232.4" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 10:58:45" /><circle class="chart-hit" cx="244.7" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 11:59:39" /><circle class="chart-hit" cx="257.0" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 12:59:40" /><circle class="chart-hit" cx="269.3" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 13:59:46" /><circle class="chart-hit" cx="281.6" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 14:59:23" /><circle class="chart-hit" cx="293.9" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 15:59:41" /><circle class="chart-hit" cx="306.2" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 16:59:01" /><circle class="chart-hit" cx="318.5" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 17:59:05" /><circle class="chart-hit" cx="330.8" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-12 18:59:45" /><circle class="chart-hit" cx="343.1" cy="69.4" r="6.1" fill="transparent" pointer-events="all" data-value="$95.49" data-tip="2026-11-12 19:58:47" /><circle class="chart-hit" cx="355.4" cy="69.4" r="6.1" fill="transparent" pointer-events="all" data-value="$95.49" data-tip="2026-11-12 20:59:49" /><circle class="chart-hit" cx="367.6" cy="69.4" r="6.1" fill="transparent" pointer-events="all" data-value="$95.49" data-tip="2026-11-12 21:59:14" /><circle class="chart-hit" cx="379.9" cy="75.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-12 22:59:30" /><circle class="chart-hit" cx="392.2" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-12 23:59:01" /><circle class="chart-hit" cx="404.5" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-13 00:59:17" /><circle class="chart-hit" cx="416.8" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-13 01:59:51" /><circle class="chart-hit" cx="429.1" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-13 02:59:15" /><circle class="chart-hit" cx="441.4" cy="110.5" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-13 03:59:47" /><circle class="chart-hit" cx="453.7" cy="92.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.29" data-tip="2026-11-13 04:58:50" /><circle class="chart-hit" cx="466.0" cy="57.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.59" data-tip="2026-11-13 05:59:55" /><circle class="chart-hit" cx="478.3" cy="57.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.59" data-tip="2026-11-13 06:59:33" /><circle class="chart-hit" cx="490.6" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 07:59:38" /><circle class="chart-hit" cx="502.9" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 08:59:33" /><circle class="chart-hit" cx="515.2" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 09:59:39" /><circle class="chart-hit" cx="527.5" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 10:59:02" /><circle class="chart-hit" cx="539.8" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 11:59:40" /><circle class="chart-hit" cx="552.1" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 12:59:38" /><circle class="chart-hit" cx="564.4" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 13:59:38" /><circle class="chart-hit" cx="576.6" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 14:59:38" /><circle class="chart-hit" cx="588.9" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 15:59:32" /><circle class="chart-hit" cx="601.2" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 16:59:19" /><circle class="chart-hit" cx="613.5" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 17:59:43" /><circle class="chart-hit" cx="625.8" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 18:58:52" /><circle class="chart-hit" cx="638.1" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 19:59:04" /><circle class="chart-hit" cx="650.4" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 20:59:35" /><circle class="chart-hit" cx="662.7" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 21:59:35" /><circle class="chart-hit" cx="675.0" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 22:59:43" /><circle class="chart-hit" cx="687.3" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-13 23:59:44" /><circle class="chart-hit" cx="699.6" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 00:59:05" /><circle class="chart-hit" cx="711.9" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 01:59:24" /><circle class="chart-hit" cx="724.2" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 02:59:42" /><circle class="chart-hit" cx="736.5" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 03:59:31" /><circle class="chart-hit" cx="748.8" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 04:59:00" /><circle class="chart-hit" cx="761.1" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 05:59:17" /><circle class="chart-hit" cx="773.4" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 06:58:31" /><circle class="chart-hit" cx="785.6" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 07:58:36" /><circle class="chart-hit" cx="797.9" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 08:58:53" /><circle class="chart-hit" cx="810.2" cy="81.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 09:58:55" /><circle class="chart-hit" cx="822.5" cy="81.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 10:59:26" /><circle class="chart-hit" cx="834.8" cy="81.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 11:58:56" /><circle class="chart-hit" cx="847.1" cy="104.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 12:58:55" /><circle class="chart-hit" cx="859.4" cy="104.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:59:44" /><circle class="chart-hit" cx="871.7" cy="110.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:59:13" /><circle class="chart-hit" cx="884.0" cy="110.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 15:00:22" /><text x="48.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-11 19:58</text><text x="466.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-13 05:59</text><text x="884.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-14 15:00</text></svg></div><div class="chart-view" data-gran-view="month" hidden><svg viewBox="0 0 900 260" width="100%" height="260" preserveAspectRatio="none" role="img" aria-label="equity curve"><rect x="0" y="0" width="900" height="260" fill="#0b1220" rx="8"/><line x1="48" y1="224.0" x2="884" y2="224.0" stroke="#334155" stroke-width="1"/><text x="42" y="228.0" text-anchor="end" fill="#94a3b8" font-size="11">$94.19</text><line x1="48" y1="172.0" x2="884" y2="172.0" stroke="#334155" stroke-width="1"/><text x="42" y="176.0" text-anchor="end" fill="#94a3b8" font-size="11">$94.63</text><line x1="48" y1="120.0" x2="884" y2="120.0" stroke="#334155" stroke-width="1"/><text x="42" y="124.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.06</text><line x1="48" y1="68.0" x2="884" y2="68.0" stroke="#334155" stroke-width="1"/><text x="42" y="72.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.50</text><line x1="48" y1="16.0" x2="884" y2="16.0" stroke="#334155" stroke-width="1"/><text x="42" y="20.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.94</text><polyline fill="#10b98133" stroke="none" points="48.0,224.0 48.0,209.7 60.3,209.7 72.6,209.7 84.9,30.3 97.2,30.3 109.5,30.3 121.8,30.3 134.1,53.7 146.4,83.1 158.6,83.1 170.9,100.6 183.2,100.6 195.5,110.7 207.8,110.7 220.1,110.7 232.4,110.7 244.7,110.7 257.0,110.7 269.3,110.7 281.6,110.7 293.9,110.7 306.2,110.7 318.5,110.7 330.8,98.9 343.1,69.4 355.4,69.4 367.6,69.4 379.9,75.3 392.2,98.9 404.5,98.9 416.8,98.9 429.1,98.9 441.4,110.5 453.7,92.8 466.0,57.3 478.3,57.3 490.6,81.0 502.9,81.0 515.2,81.0 527.5,81.0 539.8,81.0 552.1,81.0 564.4,75.1 576.6,75.1 588.9,75.1 601.2,75.1 613.5,75.1 625.8,75.1 638.1,75.1 650.4,75.1 662.7,75.1 675.0,75.1 687.3,87.0 699.6,87.0 711.9,87.0 724.2,87.0 736.5,87.0 748.8,87.0 761.1,87.0 773.4,87.0 785.6,87.0 797.9,87.0 810.2,81.1 822.5,81.1 834.8,81.1 847.1,104.8 859.4,104.8 871.7,110.8 884.0,110.8 884.0,224.0"></polyline><polyline fill="none" stroke="#10b981" stroke-width="2.5" points="48.0,209.7 60.3,209.7 72.6,209.7 84.9,30.3 97.2,30.3 109.5,30.3 121.8,30.3 134.1,53.7 146.4,83.1 158.6,83.1 170.9,100.6 183.2,100.6 195.5,110.7 207.8,110.7 220.1,110.7 232.4,110.7 244.7,110.7 257.0,110.7 269.3,110.7 281.6,110.7 293.9,110.7 306.2,110.7 318.5,110.7 330.8,98.9 343.1,69.4 355.4,69.4 367.6,69.4 379.9,75.3 392.2,98.9 404.5,98.9 416.8,98.9 429.1,98.9 441.4,110.5 453.7,92.8 466.0,57.3 478.3,57.3 490.6,81.0 502.9,81.0 515.2,81.0 527.5,81.0 539.8,81.0 552.1,81.0 564.4,75.1 576.6,75.1 588.9,75.1 601.2,75.1 613.5,75.1 625.8,75.1 638.1,75.1 650.4,75.1 662.7,75.1 675.0,75.1 687.3,87.0 699.6,87.0 711.9,87.0 724.2,87.0 736.5,87.0 748.8,87.0 761.1,87.0 773.4,87.0 785.6,87.0 797.9,87.0 810.2,81.1 822.5,81.1 834.8,81.1 847.1,104.8 859.4,104.8 871.7,110.8 884.0,110.8"></polyline><circle class="chart-dot" cx="48.0" cy="209.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="60.3" cy="209.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="72.6" cy="209.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="84.9" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="97.2" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="109.5" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="121.8" cy="30.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="134.1" cy="53.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="146.4" cy="83.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="158.6" cy="83.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="170.9" cy="100.6" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="183.2" cy="100.6" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="195.5" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="207.8" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="220.1" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="232.4" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="244.7" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="257.0" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="269.3" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="281.6" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="293.9" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="306.2" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="318.5" cy="110.7" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="330.8" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="343.1" cy="69.4" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="355.4" cy="69.4" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="367.6" cy="69.4" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="379.9" cy="75.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="392.2" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="404.5" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="416.8" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="429.1" cy="98.9" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="441.4" cy="110.5" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="453.7" cy="92.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="466.0" cy="57.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="478.3" cy="57.3" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="490.6" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="502.9" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="515.2" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="527.5" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="539.8" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="552.1" cy="81.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="564.4" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="576.6" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="588.9" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="601.2" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="613.5" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="625.8" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="638.1" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="650.4" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="662.7" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="675.0" cy="75.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="687.3" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="699.6" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="711.9" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="724.2" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="736.5" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="748.8" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="761.1" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="773.4" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="785.6" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="797.9" cy="87.0" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="810.2" cy="81.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="822.5" cy="81.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="834.8" cy="81.1" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="847.1" cy="104.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="859.4" cy="104.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="871.7" cy="110.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-dot" cx="884.0" cy="110.8" r="2.6" fill="#10b981" pointer-events="none" /><circle class="chart-hit" cx="48.0" cy="209.7" r="6.1" fill="transparent" pointer-events="all" data-value="$94.31" data-tip="2026-11-11 19:58:57" /><circle class="chart-hit" cx="60.3" cy="209.7" r="6.1" fill="transparent" pointer-events="all" data-value="$94.31" data-tip="2026-11-11 20:59:26" /><circle class="chart-hit" cx="72.6" cy="209.7" r="6.1" fill="transparent" pointer-events="all" data-value="$94.31" data-tip="2026-11-11 21:59:43" /><circle class="chart-hit" cx="84.9" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-11 22:59:47" /><circle class="chart-hit" cx="97.2" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-11 23:59:03" /><circle class="chart-hit" cx="109.5" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-12 00:59:32" /><circle class="chart-hit" cx="121.8" cy="30.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.82" data-tip="2026-11-12 01:59:30" /><circle class="chart-hit" cx="134.1" cy="53.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.62" data-tip="2026-11-12 02:59:51" /><circle class="chart-hit" cx="146.4" cy="83.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.37" data-tip="2026-11-12 03:59:05" /><circle class="chart-hit" cx="158.6" cy="83.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.37" data-tip="2026-11-12 04:58:57" /><circle class="chart-hit" cx="170.9" cy="100.6" r="6.1" fill="transparent" pointer-events="all" data-value="$95.23" data-tip="2026-11-12 05:59:38" /><circle class="chart-hit" cx="183.2" cy="100.6" r="6.1" fill="transparent" pointer-events="all" data-value="$95.23" data-tip="2026-11-12 06:59:04" /><circle class="chart-hit" cx="195.5" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 07:59:34" /><circle class="chart-hit" cx="207.8" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 08:58:53" /><circle class="chart-hit" cx="220.1" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 09:59:36" /><circle class="chart-hit" cx="232.4" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 10:58:45" /><circle class="chart-hit" cx="244.7" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 11:59:39" /><circle class="chart-hit" cx="257.0" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 12:59:40" /><circle class="chart-hit" cx="269.3" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 13:59:46" /><circle class="chart-hit" cx="281.6" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 14:59:23" /><circle class="chart-hit" cx="293.9" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 15:59:41" /><circle class="chart-hit" cx="306.2" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 16:59:01" /><circle class="chart-hit" cx="318.5" cy="110.7" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-12 17:59:05" /><circle class="chart-hit" cx="330.8" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-12 18:59:45" /><circle class="chart-hit" cx="343.1" cy="69.4" r="6.1" fill="transparent" pointer-events="all" data-value="$95.49" data-tip="2026-11-12 19:58:47" /><circle class="chart-hit" cx="355.4" cy="69.4" r="6.1" fill="transparent" pointer-events="all" data-value="$95.49" data-tip="2026-11-12 20:59:49" /><circle class="chart-hit" cx="367.6" cy="69.4" r="6.1" fill="transparent" pointer-events="all" data-value="$95.49" data-tip="2026-11-12 21:59:14" /><circle class="chart-hit" cx="379.9" cy="75.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-12 22:59:30" /><circle class="chart-hit" cx="392.2" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-12 23:59:01" /><circle class="chart-hit" cx="404.5" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-13 00:59:17" /><circle class="chart-hit" cx="416.8" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-13 01:59:51" /><circle class="chart-hit" cx="429.1" cy="98.9" r="6.1" fill="transparent" pointer-events="all" data-value="$95.24" data-tip="2026-11-13 02:59:15" /><circle class="chart-hit" cx="441.4" cy="110.5" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-13 03:59:47" /><circle class="chart-hit" cx="453.7" cy="92.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.29" data-tip="2026-11-13 04:58:50" /><circle class="chart-hit" cx="466.0" cy="57.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.59" data-tip="2026-11-13 05:59:55" /><circle class="chart-hit" cx="478.3" cy="57.3" r="6.1" fill="transparent" pointer-events="all" data-value="$95.59" data-tip="2026-11-13 06:59:33" /><circle class="chart-hit" cx="490.6" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 07:59:38" /><circle class="chart-hit" cx="502.9" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 08:59:33" /><circle class="chart-hit" cx="515.2" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 09:59:39" /><circle class="chart-hit" cx="527.5" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 10:59:02" /><circle class="chart-hit" cx="539.8" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 11:59:40" /><circle class="chart-hit" cx="552.1" cy="81.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 12:59:38" /><circle class="chart-hit" cx="564.4" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 13:59:38" /><circle class="chart-hit" cx="576.6" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 14:59:38" /><circle class="chart-hit" cx="588.9" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 15:59:32" /><circle class="chart-hit" cx="601.2" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 16:59:19" /><circle class="chart-hit" cx="613.5" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 17:59:43" /><circle class="chart-hit" cx="625.8" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 18:58:52" /><circle class="chart-hit" cx="638.1" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 19:59:04" /><circle class="chart-hit" cx="650.4" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 20:59:35" /><circle class="chart-hit" cx="662.7" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 21:59:35" /><circle class="chart-hit" cx="675.0" cy="75.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 22:59:43" /><circle class="chart-hit" cx="687.3" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-13 23:59:44" /><circle class="chart-hit" cx="699.6" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 00:59:05" /><circle class="chart-hit" cx="711.9" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 01:59:24" /><circle class="chart-hit" cx="724.2" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 02:59:42" /><circle class="chart-hit" cx="736.5" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 03:59:31" /><circle class="chart-hit" cx="748.8" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 04:59:00" /><circle class="chart-hit" cx="761.1" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 05:59:17" /><circle class="chart-hit" cx="773.4" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 06:58:31" /><circle class="chart-hit" cx="785.6" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 07:58:36" /><circle class="chart-hit" cx="797.9" cy="87.0" r="6.1" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 08:58:53" /><circle class="chart-hit" cx="810.2" cy="81.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 09:58:55" /><circle class="chart-hit" cx="822.5" cy="81.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 10:59:26" /><circle class="chart-hit" cx="834.8" cy="81.1" r="6.1" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 11:58:56" /><circle class="chart-hit" cx="847.1" cy="104.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 12:58:55" /><circle class="chart-hit" cx="859.4" cy="104.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:59:44" /><circle class="chart-hit" cx="871.7" cy="110.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:59:13" /><circle class="chart-hit" cx="884.0" cy="110.8" r="6.1" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 15:00:22" /><text x="48.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-11 19:58</text><text x="466.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-13 05:59</text><text x="884.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-14 15:00</text></svg></div><div class="chart-view" data-gran-view="day" hidden><svg viewBox="0 0 900 260" width="100%" height="260" preserveAspectRatio="none" role="img" aria-label="equity curve"><rect x="0" y="0" width="900" height="260" fill="#0b1220" rx="8"/><line x1="48" y1="224.0" x2="884" y2="224.0" stroke="#334155" stroke-width="1"/><text x="42" y="228.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.12</text><line x1="48" y1="172.0" x2="884" y2="172.0" stroke="#334155" stroke-width="1"/><text x="42" y="176.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.20</text><line x1="48" y1="120.0" x2="884" y2="120.0" stroke="#334155" stroke-width="1"/><text x="42" y="124.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.29</text><line x1="48" y1="68.0" x2="884" y2="68.0" stroke="#334155" stroke-width="1"/><text x="42" y="72.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.38</text><line x1="48" y1="16.0" x2="884" y2="16.0" stroke="#334155" stroke-width="1"/><text x="42" y="20.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.46</text><polyline fill="#f43f5e33" stroke="none" points="48.0,224.0 48.0,30.3 56.7,30.3 65.4,30.3 74.1,30.3 82.8,30.3 91.5,30.3 100.2,30.3 109.0,30.3 117.7,30.3 126.4,30.3 135.1,30.3 143.8,30.3 152.5,30.3 161.2,30.3 169.9,30.3 178.6,30.3 187.3,30.3 196.0,30.3 204.8,30.3 213.5,30.3 222.2,30.3 230.9,30.3 239.6,30.3 248.3,30.3 257.0,30.3 265.7,30.3 274.4,30.3 283.1,30.3 291.8,30.3 300.5,30.3 309.2,30.3 318.0,30.3 326.7,60.2 335.4,90.1 344.1,90.1 352.8,90.1 361.5,90.1 370.2,90.1 378.9,90.1 387.6,90.1 396.3,90.1 405.0,90.1 413.8,90.1 422.5,90.1 431.2,90.1 439.9,90.1 448.6,90.1 457.3,90.1 466.0,90.1 474.7,90.1 483.4,90.1 492.1,90.1 500.8,90.1 509.5,90.1 518.2,90.1 527.0,90.1 535.7,90.1 544.4,90.1 553.1,90.1 561.8,90.1 570.5,90.1 579.2,90.1 587.9,90.1 596.6,90.1 605.3,90.1 614.0,90.1 622.8,90.1 631.5,90.1 640.2,90.1 648.9,90.1 657.6,90.1 666.3,90.1 675.0,60.2 683.7,60.2 692.4,60.2 701.1,60.2 709.8,60.2 718.5,60.2 727.2,60.2 736.0,60.2 744.7,60.2 753.4,60.2 762.1,60.2 770.8,60.2 779.5,179.8 788.2,179.8 796.9,179.8 805.6,179.8 814.3,179.8 823.0,179.8 831.8,179.8 840.5,179.8 849.2,179.8 857.9,209.7 866.6,209.7 875.3,209.7 884.0,209.7 884.0,224.0"></polyline><polyline fill="none" stroke="#f43f5e" stroke-width="2.5" points="48.0,30.3 56.7,30.3 65.4,30.3 74.1,30.3 82.8,30.3 91.5,30.3 100.2,30.3 109.0,30.3 117.7,30.3 126.4,30.3 135.1,30.3 143.8,30.3 152.5,30.3 161.2,30.3 169.9,30.3 178.6,30.3 187.3,30.3 196.0,30.3 204.8,30.3 213.5,30.3 222.2,30.3 230.9,30.3 239.6,30.3 248.3,30.3 257.0,30.3 265.7,30.3 274.4,30.3 283.1,30.3 291.8,30.3 300.5,30.3 309.2,30.3 318.0,30.3 326.7,60.2 335.4,90.1 344.1,90.1 352.8,90.1 361.5,90.1 370.2,90.1 378.9,90.1 387.6,90.1 396.3,90.1 405.0,90.1 413.8,90.1 422.5,90.1 431.2,90.1 439.9,90.1 448.6,90.1 457.3,90.1 466.0,90.1 474.7,90.1 483.4,90.1 492.1,90.1 500.8,90.1 509.5,90.1 518.2,90.1 527.0,90.1 535.7,90.1 544.4,90.1 553.1,90.1 561.8,90.1 570.5,90.1 579.2,90.1 587.9,90.1 596.6,90.1 605.3,90.1 614.0,90.1 622.8,90.1 631.5,90.1 640.2,90.1 648.9,90.1 657.6,90.1 666.3,90.1 675.0,60.2 683.7,60.2 692.4,60.2 701.1,60.2 709.8,60.2 718.5,60.2 727.2,60.2 736.0,60.2 744.7,60.2 753.4,60.2 762.1,60.2 770.8,60.2 779.5,179.8 788.2,179.8 796.9,179.8 805.6,179.8 814.3,179.8 823.0,179.8 831.8,179.8 840.5,179.8 849.2,179.8 857.9,209.7 866.6,209.7 875.3,209.7 884.0,209.7"></polyline><circle class="chart-hit" cx="48.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 15:14:25" /><circle class="chart-hit" cx="56.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 15:29:50" /><circle class="chart-hit" cx="65.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 15:44:39" /><circle class="chart-hit" cx="74.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 15:59:32" /><circle class="chart-hit" cx="82.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 16:14:50" /><circle class="chart-hit" cx="91.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 16:29:07" /><circle class="chart-hit" cx="100.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 16:44:03" /><circle class="chart-hit" cx="109.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 16:59:19" /><circle class="chart-hit" cx="117.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 17:14:41" /><circle class="chart-hit" cx="126.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 17:28:50" /><circle class="chart-hit" cx="135.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 17:44:14" /><circle class="chart-hit" cx="143.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 17:59:43" /><circle class="chart-hit" cx="152.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 18:14:55" /><circle class="chart-hit" cx="161.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 18:29:29" /><circle class="chart-hit" cx="169.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 18:44:36" /><circle class="chart-hit" cx="178.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 18:58:52" /><circle class="chart-hit" cx="187.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 19:14:32" /><circle class="chart-hit" cx="196.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 19:28:32" /><circle class="chart-hit" cx="204.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 19:44:58" /><circle class="chart-hit" cx="213.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 19:59:04" /><circle class="chart-hit" cx="222.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 20:14:43" /><circle class="chart-hit" cx="230.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 20:29:48" /><circle class="chart-hit" cx="239.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 20:44:40" /><circle class="chart-hit" cx="248.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 20:59:35" /><circle class="chart-hit" cx="257.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 21:14:25" /><circle class="chart-hit" cx="265.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 21:28:50" /><circle class="chart-hit" cx="274.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 21:44:37" /><circle class="chart-hit" cx="283.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 21:59:35" /><circle class="chart-hit" cx="291.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 22:13:59" /><circle class="chart-hit" cx="300.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 22:29:19" /><circle class="chart-hit" cx="309.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 22:44:52" /><circle class="chart-hit" cx="318.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.44" data-tip="2026-11-13 22:59:43" /><circle class="chart-hit" cx="326.7" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-13 23:14:42" /><circle class="chart-hit" cx="335.4" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-13 23:29:51" /><circle class="chart-hit" cx="344.1" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-13 23:44:49" /><circle class="chart-hit" cx="352.8" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-13 23:59:44" /><circle class="chart-hit" cx="361.5" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 00:14:30" /><circle class="chart-hit" cx="370.2" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 00:29:47" /><circle class="chart-hit" cx="378.9" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 00:44:35" /><circle class="chart-hit" cx="387.6" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 00:59:05" /><circle class="chart-hit" cx="396.3" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 01:14:23" /><circle class="chart-hit" cx="405.0" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 01:29:08" /><circle class="chart-hit" cx="413.8" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 01:44:20" /><circle class="chart-hit" cx="422.5" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 01:59:24" /><circle class="chart-hit" cx="431.2" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 02:14:02" /><circle class="chart-hit" cx="439.9" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 02:28:47" /><circle class="chart-hit" cx="448.6" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 02:44:22" /><circle class="chart-hit" cx="457.3" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 02:59:42" /><circle class="chart-hit" cx="466.0" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 03:13:45" /><circle class="chart-hit" cx="474.7" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 03:29:42" /><circle class="chart-hit" cx="483.4" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 03:44:51" /><circle class="chart-hit" cx="492.1" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 03:59:31" /><circle class="chart-hit" cx="500.8" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 04:13:58" /><circle class="chart-hit" cx="509.5" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 04:29:33" /><circle class="chart-hit" cx="518.2" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 04:44:14" /><circle class="chart-hit" cx="527.0" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 04:59:00" /><circle class="chart-hit" cx="535.7" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 05:14:23" /><circle class="chart-hit" cx="544.4" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 05:29:29" /><circle class="chart-hit" cx="553.1" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 05:43:47" /><circle class="chart-hit" cx="561.8" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 05:59:17" /><circle class="chart-hit" cx="570.5" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 06:14:33" /><circle class="chart-hit" cx="579.2" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 06:28:36" /><circle class="chart-hit" cx="587.9" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 06:43:54" /><circle class="chart-hit" cx="596.6" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 06:58:31" /><circle class="chart-hit" cx="605.3" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 07:14:00" /><circle class="chart-hit" cx="614.0" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 07:28:56" /><circle class="chart-hit" cx="622.8" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 07:43:53" /><circle class="chart-hit" cx="631.5" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 07:58:36" /><circle class="chart-hit" cx="640.2" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 08:14:16" /><circle class="chart-hit" cx="648.9" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 08:29:00" /><circle class="chart-hit" cx="657.6" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 08:43:49" /><circle class="chart-hit" cx="666.3" cy="90.1" r="4.4" fill="transparent" pointer-events="all" data-value="$95.34" data-tip="2026-11-14 08:58:53" /><circle class="chart-hit" cx="675.0" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 09:13:52" /><circle class="chart-hit" cx="683.7" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 09:29:52" /><circle class="chart-hit" cx="692.4" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 09:44:53" /><circle class="chart-hit" cx="701.1" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 09:58:55" /><circle class="chart-hit" cx="709.8" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 10:14:37" /><circle class="chart-hit" cx="718.5" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 10:28:28" /><circle class="chart-hit" cx="727.2" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 10:43:45" /><circle class="chart-hit" cx="736.0" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 10:59:26" /><circle class="chart-hit" cx="744.7" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 11:14:19" /><circle class="chart-hit" cx="753.4" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 11:29:21" /><circle class="chart-hit" cx="762.1" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 11:43:41" /><circle class="chart-hit" cx="770.8" cy="60.2" r="4.4" fill="transparent" pointer-events="all" data-value="$95.39" data-tip="2026-11-14 11:58:56" /><circle class="chart-hit" cx="779.5" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 12:13:34" /><circle class="chart-hit" cx="788.2" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 12:29:36" /><circle class="chart-hit" cx="796.9" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 12:44:56" /><circle class="chart-hit" cx="805.6" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 12:58:55" /><circle class="chart-hit" cx="814.3" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:13:53" /><circle class="chart-hit" cx="823.0" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:29:16" /><circle class="chart-hit" cx="831.8" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:44:12" /><circle class="chart-hit" cx="840.5" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:59:44" /><circle class="chart-hit" cx="849.2" cy="179.8" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:13:53" /><circle class="chart-hit" cx="857.9" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:29:10" /><circle class="chart-hit" cx="866.6" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:43:45" /><circle class="chart-hit" cx="875.3" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:59:13" /><circle class="chart-hit" cx="884.0" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 15:00:22" /><text x="48.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-13 15:14</text><text x="466.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-14 03:13</text><text x="884.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">11-14 15:00</text></svg></div><div class="chart-view" data-gran-view="hour"><svg viewBox="0 0 900 260" width="100%" height="260" preserveAspectRatio="none" role="img" aria-label="equity curve"><rect x="0" y="0" width="900" height="260" fill="#0b1220" rx="8"/><line x1="48" y1="224.0" x2="884" y2="224.0" stroke="#334155" stroke-width="1"/><text x="42" y="228.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.14</text><line x1="48" y1="172.0" x2="884" y2="172.0" stroke="#334155" stroke-width="1"/><text x="42" y="176.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.15</text><line x1="48" y1="120.0" x2="884" y2="120.0" stroke="#334155" stroke-width="1"/><text x="42" y="124.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.17</text><line x1="48" y1="68.0" x2="884" y2="68.0" stroke="#334155" stroke-width="1"/><text x="42" y="72.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.18</text><line x1="48" y1="16.0" x2="884" y2="16.0" stroke="#334155" stroke-width="1"/><text x="42" y="20.0" text-anchor="end" fill="#94a3b8" font-size="11">$95.19</text><polyline fill="#f43f5e33" stroke="none" points="48.0,224.0 48.0,30.3 56.7,30.3 65.4,30.3 74.1,30.3 82.8,30.3 91.5,30.3 100.2,30.3 109.0,30.3 117.7,30.3 126.4,30.3 135.1,30.3 143.8,30.3 152.5,30.3 161.2,30.3 169.9,30.3 178.6,30.3 187.3,30.3 196.0,30.3 204.8,30.3 213.5,30.3 222.2,30.3 230.9,30.3 239.6,30.3 248.3,30.3 257.0,30.3 265.7,30.3 274.4,30.3 283.1,30.3 291.8,30.3 300.5,30.3 309.2,30.3 318.0,30.3 326.7,30.3 335.4,30.3 344.1,30.3 352.8,30.3 361.5,30.3 370.2,30.3 378.9,30.3 387.6,30.3 396.3,30.3 405.0,30.3 413.8,30.3 422.5,30.3 431.2,30.3 439.9,30.3 448.6,30.3 457.3,30.3 466.0,30.3 474.7,30.3 483.4,30.3 492.1,30.3 500.8,30.3 509.5,30.3 518.2,30.3 527.0,30.3 535.7,30.3 544.4,30.3 553.1,30.3 561.8,30.3 570.5,30.3 579.2,30.3 587.9,30.3 596.6,30.3 605.3,30.3 614.0,30.3 622.8,30.3 631.5,209.7 640.2,209.7 648.9,209.7 657.6,209.7 666.3,209.7 675.0,209.7 683.7,209.7 692.4,209.7 701.1,209.7 709.8,209.7 718.5,209.7 727.2,209.7 736.0,209.7 744.7,209.7 753.4,209.7 762.1,209.7 770.8,209.7 779.5,209.7 788.2,209.7 796.9,209.7 805.6,209.7 814.3,209.7 823.0,209.7 831.8,209.7 840.5,209.7 849.2,209.7 857.9,209.7 866.6,209.7 875.3,209.7 884.0,209.7 884.0,224.0"></polyline><polyline fill="none" stroke="#f43f5e" stroke-width="2.5" points="48.0,30.3 56.7,30.3 65.4,30.3 74.1,30.3 82.8,30.3 91.5,30.3 100.2,30.3 109.0,30.3 117.7,30.3 126.4,30.3 135.1,30.3 143.8,30.3 152.5,30.3 161.2,30.3 169.9,30.3 178.6,30.3 187.3,30.3 196.0,30.3 204.8,30.3 213.5,30.3 222.2,30.3 230.9,30.3 239.6,30.3 248.3,30.3 257.0,30.3 265.7,30.3 274.4,30.3 283.1,30.3 291.8,30.3 300.5,30.3 309.2,30.3 318.0,30.3 326.7,30.3 335.4,30.3 344.1,30.3 352.8,30.3 361.5,30.3 370.2,30.3 378.9,30.3 387.6,30.3 396.3,30.3 405.0,30.3 413.8,30.3 422.5,30.3 431.2,30.3 439.9,30.3 448.6,30.3 457.3,30.3 466.0,30.3 474.7,30.3 483.4,30.3 492.1,30.3 500.8,30.3 509.5,30.3 518.2,30.3 527.0,30.3 535.7,30.3 544.4,30.3 553.1,30.3 561.8,30.3 570.5,30.3 579.2,30.3 587.9,30.3 596.6,30.3 605.3,30.3 614.0,30.3 622.8,30.3 631.5,209.7 640.2,209.7 648.9,209.7 657.6,209.7 666.3,209.7 675.0,209.7 683.7,209.7 692.4,209.7 701.1,209.7 709.8,209.7 718.5,209.7 727.2,209.7 736.0,209.7 744.7,209.7 753.4,209.7 762.1,209.7 770.8,209.7 779.5,209.7 788.2,209.7 796.9,209.7 805.6,209.7 814.3,209.7 823.0,209.7 831.8,209.7 840.5,209.7 849.2,209.7 857.9,209.7 866.6,209.7 875.3,209.7 884.0,209.7"></polyline><circle class="chart-hit" cx="48.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:01:32" /><circle class="chart-hit" cx="56.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:02:44" /><circle class="chart-hit" cx="65.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:03:56" /><circle class="chart-hit" cx="74.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:05:16" /><circle class="chart-hit" cx="82.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:06:27" /><circle class="chart-hit" cx="91.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:07:52" /><circle class="chart-hit" cx="100.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:09:15" /><circle class="chart-hit" cx="109.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:10:20" /><circle class="chart-hit" cx="117.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:11:23" /><circle class="chart-hit" cx="126.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:12:35" /><circle class="chart-hit" cx="135.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:13:53" /><circle class="chart-hit" cx="143.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:15:07" /><circle class="chart-hit" cx="152.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:16:36" /><circle class="chart-hit" cx="161.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:17:59" /><circle class="chart-hit" cx="169.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:19:18" /><circle class="chart-hit" cx="178.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:20:35" /><circle class="chart-hit" cx="187.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:21:51" /><circle class="chart-hit" cx="196.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:23:05" /><circle class="chart-hit" cx="204.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:24:12" /><circle class="chart-hit" cx="213.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:25:37" /><circle class="chart-hit" cx="222.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:26:45" /><circle class="chart-hit" cx="230.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:27:57" /><circle class="chart-hit" cx="239.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:29:16" /><circle class="chart-hit" cx="248.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:30:30" /><circle class="chart-hit" cx="257.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:31:55" /><circle class="chart-hit" cx="265.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:33:00" /><circle class="chart-hit" cx="274.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:34:06" /><circle class="chart-hit" cx="283.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:35:37" /><circle class="chart-hit" cx="291.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:36:41" /><circle class="chart-hit" cx="300.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:38:00" /><circle class="chart-hit" cx="309.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:39:05" /><circle class="chart-hit" cx="318.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:40:11" /><circle class="chart-hit" cx="326.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:41:38" /><circle class="chart-hit" cx="335.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:42:48" /><circle class="chart-hit" cx="344.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:44:12" /><circle class="chart-hit" cx="352.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:45:34" /><circle class="chart-hit" cx="361.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:46:58" /><circle class="chart-hit" cx="370.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:47:56" /><circle class="chart-hit" cx="378.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:49:04" /><circle class="chart-hit" cx="387.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:50:30" /><circle class="chart-hit" cx="396.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:51:34" /><circle class="chart-hit" cx="405.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:52:33" /><circle class="chart-hit" cx="413.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:53:50" /><circle class="chart-hit" cx="422.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:54:52" /><circle class="chart-hit" cx="431.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:56:07" /><circle class="chart-hit" cx="439.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:57:30" /><circle class="chart-hit" cx="448.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:58:38" /><circle class="chart-hit" cx="457.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 13:59:44" /><circle class="chart-hit" cx="466.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:00:44" /><circle class="chart-hit" cx="474.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:01:56" /><circle class="chart-hit" cx="483.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:02:59" /><circle class="chart-hit" cx="492.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:04:03" /><circle class="chart-hit" cx="500.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:05:03" /><circle class="chart-hit" cx="509.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:06:11" /><circle class="chart-hit" cx="518.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:07:17" /><circle class="chart-hit" cx="527.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:08:27" /><circle class="chart-hit" cx="535.7" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:09:53" /><circle class="chart-hit" cx="544.4" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:11:15" /><circle class="chart-hit" cx="553.1" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:12:26" /><circle class="chart-hit" cx="561.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:13:53" /><circle class="chart-hit" cx="570.5" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:15:02" /><circle class="chart-hit" cx="579.2" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:16:30" /><circle class="chart-hit" cx="587.9" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:17:49" /><circle class="chart-hit" cx="596.6" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:19:05" /><circle class="chart-hit" cx="605.3" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:20:11" /><circle class="chart-hit" cx="614.0" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:21:21" /><circle class="chart-hit" cx="622.8" cy="30.3" r="4.4" fill="transparent" pointer-events="all" data-value="$95.19" data-tip="2026-11-14 14:22:37" /><circle class="chart-hit" cx="631.5" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:23:56" /><circle class="chart-hit" cx="640.2" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:24:56" /><circle class="chart-hit" cx="648.9" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:26:26" /><circle class="chart-hit" cx="657.6" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:27:43" /><circle class="chart-hit" cx="666.3" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:29:10" /><circle class="chart-hit" cx="675.0" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:30:16" /><circle class="chart-hit" cx="683.7" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:31:31" /><circle class="chart-hit" cx="692.4" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:32:39" /><circle class="chart-hit" cx="701.1" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:33:47" /><circle class="chart-hit" cx="709.8" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:35:11" /><circle class="chart-hit" cx="718.5" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:36:41" /><circle class="chart-hit" cx="727.2" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:37:59" /><circle class="chart-hit" cx="736.0" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:39:13" /><circle class="chart-hit" cx="744.7" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:40:12" /><circle class="chart-hit" cx="753.4" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:41:27" /><circle class="chart-hit" cx="762.1" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:42:34" /><circle class="chart-hit" cx="770.8" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:43:45" /><circle class="chart-hit" cx="779.5" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:45:02" /><circle class="chart-hit" cx="788.2" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:46:05" /><circle class="chart-hit" cx="796.9" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:47:27" /><circle class="chart-hit" cx="805.6" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:48:36" /><circle class="chart-hit" cx="814.3" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:49:51" /><circle class="chart-hit" cx="823.0" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:51:09" /><circle class="chart-hit" cx="831.8" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:52:28" /><circle class="chart-hit" cx="840.5" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:53:51" /><circle class="chart-hit" cx="849.2" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:55:20" /><circle class="chart-hit" cx="857.9" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:56:47" /><circle class="chart-hit" cx="866.6" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:58:13" /><circle class="chart-hit" cx="875.3" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 14:59:13" /><circle class="chart-hit" cx="884.0" cy="209.7" r="4.4" fill="transparent" pointer-events="all" data-value="$95.14" data-tip="2026-11-14 15:00:22" /><text x="48.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">13:01</text><text x="466.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">14:00</text><text x="884.0" y="250" text-anchor="middle" fill="#94a3b8" font-size="11">15:00</text></svg></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div><h2>当前持仓明细</h2><p>Open positions</p></div>
+        <span class="panel-meta">Best Bid 计价</span>
+      </div>
+      <div class="panel-note">按真实买一价估值；初始浮亏反映盘口买卖价差。</div>
+      <div class="scroll-region" data-scroll-key="positions" tabindex="0" role="region" aria-label="当前持仓明细，可滚动">
+        <table class="positions-table">
+          <thead><tr><th>方向</th><th>分类</th><th>预测市场问题</th><th>买入价 Ask</th><th>现买一价 Bid</th><th>模型概率 Edge</th><th>投入本金</th><th>清算市值</th><th>实时浮盈亏</th><th>建仓时间</th><th>盘口更新</th></tr></thead>
+          <tbody>
+        <tr>
+            <td><span class="badge badge-side">Yes</span></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell" title="Will Notre Dame Fighting Irish win the 2027 CFP National Championship?">Will Notre Dame Fighting Irish win the 2027 CFP National Championship?</td>
+            <td>0.210</td>
+            <td>0.180 <span class="sub">(Ask 0.190)</span></td>
+            <td>0.244 <span class="sub">(+0.029)</span></td>
+            <td>$1.07 <span class="sub">(5.1份)</span></td>
+            <td>$0.90</td>
+            <td class="neg">$-0.18 (-16.4%)</td>
+            <td class="sub">2026-11-08 02:04:58 UTC</td>
+            <td class="sub">2026-11-14 15:00:21 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge badge-side">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell" title="Democratic 2028 presidential odds dip to 60% by March 31?">Democratic 2028 presidential odds dip to 60% by March 31?</td>
+            <td>0.390</td>
+            <td>0.310 <span class="sub">(Ask 0.330)</span></td>
+            <td>0.428 <span class="sub">(+0.029)</span></td>
+            <td>$1.95 <span class="sub">(5.0份)</span></td>
+            <td>$1.51</td>
+            <td class="neg">$-0.44 (-22.7%)</td>
+            <td class="sub">2026-11-08 06:34:50 UTC</td>
+            <td class="sub">2026-11-14 15:00:21 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge badge-side">Vikings</span></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell" title="Vikings vs. Packers">Vikings vs. Packers</td>
+            <td>0.400</td>
+            <td>0.410 <span class="sub">(Ask 0.420)</span></td>
+            <td>0.437 <span class="sub">(+0.030)</span></td>
+            <td>$2.00 <span class="sub">(5.0份)</span></td>
+            <td>$2.01</td>
+            <td class="pos">$+0.01 (+0.7%)</td>
+            <td class="sub">2026-11-10 19:54:13 UTC</td>
+            <td class="sub">2026-11-14 15:00:21 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge badge-side">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell" title="Major airlines suspend Ben Gurion flights by December 31, 2026?">Major airlines suspend Ben Gurion flights by December 31, 2026?</td>
+            <td>0.230</td>
+            <td>0.170 <span class="sub">(Ask 0.190)</span></td>
+            <td>0.262 <span class="sub">(+0.032)</span></td>
+            <td>$1.15 <span class="sub">(5.0份)</span></td>
+            <td>$0.85</td>
+            <td class="neg">$-0.30 (-26.1%)</td>
+            <td class="sub">2026-11-13 23:06:16 UTC</td>
+            <td class="sub">2026-11-14 15:00:22 UTC</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div><h2>在途挂单账本</h2><p>Pending orders</p></div>
+        <span class="panel-meta">0 阻塞 / 0 总计</span>
+      </div>
+      <div class="scroll-region" data-scroll-key="orders" tabindex="0" role="region" aria-label="在途挂单账本，可滚动">
+        <table class="orders-table">
+          <thead><tr><th>订单ID</th><th>方向</th><th>用途</th><th>市场</th><th>价格</th><th>份额</th><th>名义金额</th><th>状态</th><th>更新时间</th></tr></thead>
+          <tbody><tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:18px;">该账本不使用链上挂单（无在途订单）</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+
+
+    <section class="panel">
+      <div class="panel-header">
+        <div><h2>已平仓历史记录</h2><p>Closed trades</p></div>
+        <span class="panel-meta">最近 15 笔</span>
+      </div>
+      <div class="scroll-region" data-scroll-key="closed" tabindex="0" role="region" aria-label="已平仓历史记录，可滚动">
+        <table class="closed-table">
+          <thead><tr><th>方向</th><th>分类</th><th>市场</th><th>开仓价</th><th>平仓价 Bid</th><th>本金</th><th>已实现盈亏</th><th>平仓触发原因</th><th>平仓时间</th></tr></thead>
+          <tbody>
+        <tr>
+            <td><span class="badge">Down</span></td>
+            <td><span class="cat cat-finance">金融</span></td>
+            <td class="q-cell">S&P 500 (SPX) Up or Down on November 13?</td>
+            <td>0.400</td>
+            <td>0.440</td>
+            <td>$2.00</td>
+            <td class="pos">$+0.15 (+7.5%)</td>
+            <td>峰值回撤退出 (Peak 0.520 -> 0.440, 回撤 0.080, 净 7.54%)</td>
+            <td class="sub">2026-11-13 07:01:53 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">No</span></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Will the Golden State Warriors make the 2027 NBA Playoffs?</td>
+            <td>0.390</td>
+            <td>0.390</td>
+            <td>$1.95</td>
+            <td class="neg">$-0.04 (-1.8%)</td>
+            <td>峰值回撤退出 (Peak 0.440 -> 0.390, 回撤 0.050, 净 -1.83%)</td>
+            <td class="sub">2026-11-12 23:20:33 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Up</span></td>
+            <td><span class="cat cat-finance">金融</span></td>
+            <td class="q-cell">S&P 500 (SPX) Up or Down on November 12?</td>
+            <td>0.400</td>
+            <td>0.290</td>
+            <td>$2.00</td>
+            <td class="neg">$-0.59 (-29.6%)</td>
+            <td>ATR 止损 (Bid 0.29 <= 0.2983, z -0.895 <= -0.855, 距离 0.45 logit, ATR_z 0.102, 浮亏 -29.56%)</td>
+            <td class="sub">2026-11-12 05:12:08 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">Jensen Huang announced resignation or removal by March 31, 2027?</td>
+            <td>0.380</td>
+            <td>0.700</td>
+            <td>$1.90</td>
+            <td class="pos">$+1.56 (+82.0%)</td>
+            <td>峰值回撤退出 (Peak 0.780 -> 0.700, 回撤 0.080, 净 82.00%)</td>
+            <td class="sub">2026-11-11 22:29:38 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">No</span></td>
+            <td><span class="cat cat-tech">科技</span></td>
+            <td class="q-cell">Will there be no next Meta Muse Spark model release by November 30, 2026?</td>
+            <td>0.400</td>
+            <td>0.280</td>
+            <td>$2.00</td>
+            <td class="neg">$-0.64 (-32.0%)</td>
+            <td>ATR 止损 (Bid 0.28 <= 0.2883, z -0.944 <= -0.903, 距离 0.50 logit, ATR_z 0.166, 浮亏 -32.02%)</td>
+            <td class="sub">2026-11-11 19:37:04 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">No</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Will Russia capture Rai-Oleksandrivka by December 31?</td>
+            <td>0.350</td>
+            <td>0.310</td>
+            <td>$1.95</td>
+            <td class="neg">$-0.22 (-11.4%)</td>
+            <td>峰值回撤退出 (Peak 0.360 -> 0.310, 回撤 0.050, 净 -11.43%)</td>
+            <td class="sub">2026-11-11 00:24:46 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">US announces end of Iranian blockade by November 30, 2026?</td>
+            <td>0.270</td>
+            <td>0.190</td>
+            <td>$1.35</td>
+            <td class="neg">$-0.40 (-29.6%)</td>
+            <td>ATR 止损 (Bid 0.19 <= 0.1908, z -1.450 <= -1.445, 距离 0.45 logit, ATR_z 0.082, 浮亏 -29.63%)</td>
+            <td class="sub">2026-11-09 21:12:10 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">US-Iran Hormuz Agreement by November 30?</td>
+            <td>0.250</td>
+            <td>0.170</td>
+            <td>$1.94</td>
+            <td class="neg">$-0.62 (-32.0%)</td>
+            <td>ATR 止损 (Bid 0.17 <= 0.1753, z -1.586 <= -1.549, 距离 0.45 logit, ATR_z 0.070, 浮亏 -32.00%)</td>
+            <td class="sub">2026-11-09 20:47:11 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">Houthis capture Taiz city by December 31?</td>
+            <td>0.320</td>
+            <td>0.230</td>
+            <td>$2.00</td>
+            <td class="neg">$-0.56 (-28.1%)</td>
+            <td>ATR 止损 (Bid 0.23 <= 0.2308, z -1.208 <= -1.204, 距离 0.45 logit, ATR_z 0.055, 浮亏 -28.12%)</td>
+            <td class="sub">2026-11-09 19:03:46 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">US imports Russian diesel by January 31?</td>
+            <td>0.260</td>
+            <td>0.270</td>
+            <td>$1.30</td>
+            <td class="pos">$+0.05 (+3.9%)</td>
+            <td>峰值回撤退出 (Peak 0.330 -> 0.270, 回撤 0.060, 净 3.85%)</td>
+            <td class="sub">2026-11-09 17:31:33 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">US announces end of Iranian blockade by November 30, 2026?</td>
+            <td>0.210</td>
+            <td>0.190</td>
+            <td>$1.19</td>
+            <td class="neg">$-0.11 (-9.5%)</td>
+            <td>峰值回撤退出 (Peak 0.240 -> 0.190, 回撤 0.050, 净 -9.52%)</td>
+            <td class="sub">2026-11-09 12:37:25 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">No</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Israel x Iran ceasefire continues through November 22?</td>
+            <td>0.230</td>
+            <td>0.160</td>
+            <td>$1.40</td>
+            <td class="neg">$-0.43 (-30.4%)</td>
+            <td>ATR 止损 (Bid 0.16 <= 0.16, z -1.658 <= -1.658, 距离 0.45 logit, ATR_z 0.060, 浮亏 -30.43%)</td>
+            <td class="sub">2026-11-09 01:54:47 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">No</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">US x Iran Effective Ceasefire by December 31?</td>
+            <td>0.250</td>
+            <td>0.200</td>
+            <td>$1.25</td>
+            <td class="neg">$-0.25 (-20.0%)</td>
+            <td>峰值回撤退出 (Peak 0.260 -> 0.200, 回撤 0.060, 净 -20.00%)</td>
+            <td class="sub">2026-11-08 20:14:03 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Buttigieg's Democratic nomination odds dip to 4% by December 31?</td>
+            <td>0.380</td>
+            <td>0.140</td>
+            <td>$1.90</td>
+            <td class="neg">$-1.22 (-64.4%)</td>
+            <td>灾难止损 (Bid 0.14 <= 0.171, 浮亏 -64.43%, 阈值 -55%)</td>
+            <td class="sub">2026-11-08 18:35:55 UTC</td>
+        </tr>
+
+        <tr>
+            <td><span class="badge">Yes</span></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Israeli airspace closed by December 31, 2026?</td>
+            <td>0.340</td>
+            <td>0.330</td>
+            <td>$1.70</td>
+            <td class="neg">$-0.05 (-2.9%)</td>
+            <td>峰值回撤退出 (Peak 0.380 -> 0.330, 回撤 0.050, 净 -2.94%)</td>
+            <td class="sub">2026-11-08 12:34:34 UTC</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel signals-wide">
+      <div class="panel-header">
+        <div><h2>风控门与特征扫描</h2><p>Signals & skips</p></div>
+        <span class="panel-meta">Logit 空间</span>
+      </div>
+      <div class="scroll-region" data-scroll-key="signals" tabindex="0" role="region" aria-label="风控与扫描日志，可滚动">
+        <table class="signals-table">
+          <thead><tr><th>时间</th><th>动作</th><th>规则代码</th><th>分类</th><th>市场</th><th>量化指标与原因明细</th></tr></thead>
+          <tbody>
+        <tr>
+            <td class="sub">15:00:07 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>WIDE_SPREAD</code></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">Will Home Depot (HD) Q3 comparable sales growth be 2.5% or more?</td>
+            <td>[Yes] 盘口价差过大 Spread=0.050 > 0.04 (Bid=0.66, Ask=0.71) <div class="sub">Ask:0.71 | Spread:0.05 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:07 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>SPREAD_TOO_WIDE_RELATIVE</code></td>
+            <td><span class="cat cat-finance">金融</span></td>
+            <td class="q-cell">Will annual inflation be 3.7% in November?</td>
+            <td>[Yes] 价差占价格 8.0% > 5.0% (Spread=0.020, Ask=0.250) <div class="sub">Ask:0.25 | Spread:0.02 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:07 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Spread: Kentucky (-2.5)</td>
+            <td>[Kentucky] 动量或优势不足 (ROC_z=+0.000, Imb=-0.42, Edge=-0.001) <div class="sub">Ask:0.55 | Spread:0.01 | ROC_z:0.0 | Edge:-0.0009</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:07 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>SPREAD_TOO_WIDE_RELATIVE</code></td>
+            <td><span class="cat cat-finance">金融</span></td>
+            <td class="q-cell">Will Crude Oil reach a new all-time high by March 31, 2027?</td>
+            <td>[Yes] 价差占价格 6.7% > 5.0% (Spread=0.010, Ask=0.150) <div class="sub">Ask:0.15 | Spread:0.01 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:08 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>SPREAD_TOO_WIDE_RELATIVE</code></td>
+            <td><span class="cat cat-esports">电竞</span></td>
+            <td class="q-cell">Counter-Strike: Iberian Soul vs FORZE Reload (BO3) - CCT Europe Play</td>
+            <td>[FORZE Reload] 价差占价格 6.7% > 5.0% (Spread=0.030, Ask=0.450) <div class="sub">Ask:0.45 | Spread:0.03 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:08 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>SPREAD_TOO_WIDE_RELATIVE</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Spread: Penn State (-20.5)</td>
+            <td>[Penn State] 价差占价格 6.9% > 5.0% (Spread=0.020, Ask=0.290) <div class="sub">Ask:0.29 | Spread:0.02 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:08 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NEAR_SETTLEMENT</code></td>
+            <td><span class="cat cat-esports">电竞</span></td>
+            <td class="q-cell">Counter-Strike: eSuba vs KAMUI - Map 2 Winner</td>
+            <td>距离结算不足2小时 (0.16h) <div class="sub"></div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:08 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">Will the next Fable model (5.2+) debut at a score of at least 1540 b</td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.106(<0.15) NO=0.921(>0.85) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:08 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Russia x Ukraine ceasefire agreement by January 31, 2027?</td>
+            <td>[No] 动量或优势不足 (ROC_z=+0.058, Imb=-0.19, Edge=+0.005) · 已补评另一侧 <div class="sub">Ask:0.79 | Spread:0.01 | ROC_z:0.0583 | Edge:0.005</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:09 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">Will Fallin' - Chris Brown feat. Leon Thomas win Best R&B Collaborat</td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.120(<0.15) NO=0.890(>0.85) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:09 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-crypto">加密</span></td>
+            <td class="q-cell">Will the price of Bitcoin be above $68,000 on November 19?</td>
+            <td>[No] 动量或优势不足 (ROC_z=+0.272, Imb=-0.92, Edge=+0.022) · 已补评另一侧 <div class="sub">Ask:0.7 | Spread:0.01 | ROC_z:0.2719 | Edge:0.022</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:09 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-weather">天气</span></td>
+            <td class="q-cell">Will the highest temperature in Austin be 55°F or below on November </td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.080(<0.15) NO=0.926(>0.85) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:10 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-other">其他</span></td>
+            <td class="q-cell">Will France win on 2026-11-15?</td>
+            <td>[Yes] 动量或优势不足 (ROC_z=+0.000, Imb=-0.77, Edge=-0.001) <div class="sub">Ask:0.8 | Spread:0.01 | ROC_z:0.0 | Edge:-0.0011</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:10 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Games Total: O/U 4.5</td>
+            <td>[Over] 动量或优势不足 (ROC_z=+0.000, Imb=-0.57, Edge=-0.001) <div class="sub">Ask:0.36 | Spread:0.01 | ROC_z:0.0 | Edge:-0.0011</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:10 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Will BN win the 2026 Melaka general elections?</td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.998(>0.85) NO=0.005(<0.15) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:11 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-politics">政治</span></td>
+            <td class="q-cell">Will Mark Kelly win the 2028 Democratic presidential nomination?</td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.024(<0.15) NO=0.977(>0.85) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:11 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-crypto">加密</span></td>
+            <td class="q-cell">Will the price of Bitcoin be above $70,000 on November 15?</td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.013(<0.15) NO=0.988(>0.85) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:11 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-crypto">加密</span></td>
+            <td class="q-cell">Will the price of Bitcoin be above $60,000 on November 20?</td>
+            <td>YES/NO 卖一价均不在 [0.15, 0.85] 核心可交易区间 | YES=0.907(>0.85) NO=0.122(<0.15) <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:11 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Portugal vs. Denmark: O/U 2.5</td>
+            <td>[Under] 动量或优势不足 (ROC_z=+0.043, Imb=+0.42, Edge=+0.006) · 已补评另一侧 <div class="sub">Ask:0.38 | Spread:0.01 | ROC_z:0.0429 | Edge:0.0064</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:12 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>SPREAD_TOO_WIDE_RELATIVE</code></td>
+            <td><span class="cat cat-finance">金融</span></td>
+            <td class="q-cell">Marathon Fusion's high-rate gold alchemy confirmed by June 30, 2027?</td>
+            <td>[Yes] 价差占价格 11.8% > 5.0% (Spread=0.020, Ask=0.170) <div class="sub">Ask:0.17 | Spread:0.02 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:12 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NEAR_SETTLEMENT</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Wigan Athletic FC vs. Barnsley FC: O/U 3.5</td>
+            <td>距离结算不足2小时 (-0.0h) <div class="sub"></div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:12 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>SPREAD_TOO_WIDE_RELATIVE</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Alabama vs. Vanderbilt</td>
+            <td>[Vanderbilt] 价差占价格 6.7% > 5.0% (Spread=0.010, Ask=0.150) <div class="sub">Ask:0.15 | Spread:0.01 | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:12 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-tech">科技</span></td>
+            <td class="q-cell">Will NVIDIA's next CEO be an internal candidate?</td>
+            <td>[No] 动量或优势不足 (ROC_z=+0.020, Imb=+0.28, Edge=+0.003) · 已补评另一侧 <div class="sub">Ask:0.58 | Spread:0.01 | ROC_z:0.0204 | Edge:0.0033</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:12 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>OUT_OF_PROB_RANGE</code></td>
+            <td><span class="cat cat-sports">体育</span></td>
+            <td class="q-cell">Exact Score: Any Other Score?</td>
+            <td>YES/NO 两侧盘口均缺失，无法取得卖一价 <div class="sub">Ask:- | Spread:- | ROC_z:- | Edge:-</div></td>
+        </tr>
+
+        <tr>
+            <td class="sub">15:00:13 UTC</td>
+            <td><span class="badge badge-skip">SKIP</span></td>
+            <td><code>NO_EDGE_OR_MOMENTUM</code></td>
+            <td><span class="cat cat-tech">科技</span></td>
+            <td class="q-cell">Tesla and SpaceX merger officially announced by December 31, 2027?</td>
+            <td>[Yes] 动量或优势不足 (ROC_z=+0.000, Imb=+0.65, Edge=+0.002) <div class="sub">Ask:0.85 | Spread:0.02 | ROC_z:0.0 | Edge:0.0018</div></td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="chart-tip" class="chart-tip" hidden></div>
+<script>
+(() => {
+  const regions = document.querySelectorAll('[data-scroll-key]');
+  regions.forEach((region) => {
+    const key = 'pm-dashboard:' + region.dataset.scrollKey;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(key) || '[0,0]');
+      region.scrollTop = Number(saved[0]) || 0;
+      region.scrollLeft = Number(saved[1]) || 0;
+    } catch (_) {}
+    let frame = null;
+    region.addEventListener('scroll', () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        try { sessionStorage.setItem(key, JSON.stringify([region.scrollTop, region.scrollLeft])); } catch (_) {}
+        frame = null;
+      });
+    }, { passive: true });
+  });
+
+  // 净值图时间粒度切换：年 / 月 / 日 / 时。
+  // 页面每 15 秒整页刷新一次，所以选择必须存到 sessionStorage 才能跨刷新保留。
+  const granTabs = document.querySelectorAll('[data-gran-tab]');
+  const granViews = document.querySelectorAll('[data-gran-view]');
+  const granKey = 'pm-dashboard:equity-gran';
+  const applyGran = (gran) => {
+    granViews.forEach((view) => { view.hidden = view.dataset.granView !== gran; });
+    granTabs.forEach((tab) => { tab.setAttribute('aria-selected', String(tab.dataset.granTab === gran)); });
+  };
+  let savedGran = 'hour';
+  try { savedGran = sessionStorage.getItem(granKey) || 'hour'; } catch (_) {}
+  applyGran(savedGran);
+  granTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const gran = tab.dataset.granTab;
+      try { sessionStorage.setItem(granKey, gran); } catch (_) {}
+      applyGran(gran);
+    });
+  });
+
+  // 净值图悬浮提示：hover 命中圆显示该点的时间与净值。
+  // 用事件委托挂在 svg 上，避免给每个点单独绑定监听器。
+  const chartTip = document.getElementById('chart-tip');
+  const hideTip = () => { if (chartTip) chartTip.hidden = true; };
+  document.querySelectorAll('[data-gran-view] svg').forEach((svg) => {
+    svg.addEventListener('mouseover', (event) => {
+      const hit = event.target.closest('.chart-hit');
+      if (!hit || !chartTip) return;
+      const box = hit.getBoundingClientRect();
+      const strong = document.createElement('b');
+      strong.textContent = hit.dataset.value || '';
+      chartTip.textContent = '';
+      chartTip.appendChild(strong);
+      chartTip.appendChild(document.createTextNode(hit.dataset.tip || ''));
+      chartTip.hidden = false;
+      // 贴边时把浮层拉回视窗内，避免在小面板里被裁掉
+      const left = Math.min(Math.max(box.left + box.width / 2, 76), window.innerWidth - 76);
+      const top = Math.max(box.top - 6, 62);
+      chartTip.style.left = left + 'px';
+      chartTip.style.top = top + 'px';
+    });
+    svg.addEventListener('mouseleave', hideTip);
+  });
+  window.addEventListener('scroll', hideTip, { passive: true });
+
+  // 页面自检：引擎停止后 HTML 不再生成，但浏览器仍每 15 秒重载同一份文件，
+  // 顶栏会一直显示最后一次的状态（例如"系统连接正常"）。这里用生成时间判断过期。
+  const generatedAt = document.body.dataset.generatedAt;
+  const checkStale = () => {
+    if (!generatedAt) return;
+    const ageSec = (Date.now() - new Date(generatedAt).getTime()) / 1000;
+    if (ageSec <= 600) return;
+    const strip = document.querySelector('.status-strip');
+    if (!strip || strip.classList.contains('danger')) return;
+    strip.className = 'status-strip danger';
+    const dot = document.createElement('span');
+    dot.className = 'banner-dot';
+    const strong = document.createElement('strong');
+    strong.textContent = '监控数据已过期 ' + Math.round(ageSec / 60) + ' 分钟';
+    const detail = document.createElement('span');
+    detail.className = 'status-headline';
+    detail.textContent = '引擎可能已停止：页面仍在刷新，但数据不再更新。请检查进程或重新运行启动器。';
+    strip.textContent = '';
+    strip.appendChild(dot);
+    strip.appendChild(strong);
+    strip.appendChild(detail);
+    document.body.classList.add('data-stale');
+  };
+  checkStale();
+  setInterval(checkStale, 30000);
+
+})();
+</script>
+<script>
+(function() {
+  var current = document.body.dataset.generatedAt || '';
+  if (!current) return;
+  async function checkForUpdate() {
+    try {
+      var response = await fetch(window.location.pathname + '?poll=' + Date.now(), {cache: 'no-store'});
+      if (!response.ok) return;
+      var text = await response.text();
+      var match = text.match(/data-generated-at="([^"]+)"/);
+      if (match && match[1] && match[1] !== current) {
+        window.location.reload();
+      }
+    } catch (error) {}
+  }
+  setInterval(checkForUpdate, 30000);
+})();
+</script>
+<script>
+(function() {
+  function paintResearch(d) {
+    if (!d) return;
+    var section = document.getElementById('research-progress');
+    if (!section) return;
+    section.style.display = 'block';
+    var resolved = Number(d.resolved_unique || 0);
+    var target = Number(d.target || 1000);
+    var pct = target > 0 ? Math.min(100, resolved / target * 100) : 0;
+    document.getElementById('rp-resolved').textContent = resolved;
+    document.getElementById('rp-bar').style.width = pct.toFixed(1) + '%';
+    var fmt = function(v) { return (v === undefined || v === null) ? '—' : v; };
+    var meta = document.getElementById('rp-meta');
+    meta.textContent = 'v1 ' + fmt(d.v1_resolved) + ' · v2 ' + fmt(d.v2_resolved) + ' · ' + pct.toFixed(1) + '%';
+    meta.title = 'EVAL ' + fmt(d.eval_records) + ' · ' + (d.generated_at || '');
+  }
+  fetch('research_status.json', {cache: 'no-store'})
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(paintResearch)
+    .catch(function() {});
+})();
+</script>
+</body>
+</html>
