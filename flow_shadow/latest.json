@@ -1,12 +1,16 @@
 {
-  "generated_at": "2026-11-20T01:45:05.187462+00:00",
-  "run_id": "44655757644",
-  "elapsed_seconds": 49.39,
-  "universe_markets": 1596,
-  "universe_discovered_at": "2026-11-20T01:44:21.957399+00:00",
+  "generated_at": "2026-11-20T09:54:03.049209+00:00",
+  "run_id": "44714436542",
+  "elapsed_seconds": 59.46,
+  "universe_markets": 2003,
+  "universe_discovered_at": "2026-11-20T09:53:12.318742+00:00",
   "selected_markets": 60,
-  "rows": 47,
+  "rows": 48,
   "errors": [
+    {
+      "condition_id": "0xf20d331cca9c22989f585f7c1b7b31abb09d92c5d2644f1b3103ad4462a4532b",
+      "error": "book_unavailable"
+    },
     {
       "condition_id": "0x0d44e82798b1bbefa1a1630b88db273b93b9a008dac1ee45ffac9d03ece0516f",
       "error": "book_unavailable"
@@ -16,15 +20,7 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x56aed2130ecbca8523f31b52acfa47df16927e9d76b303203bdf18f26cfb2ee4",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x5129477ceb65389a725cf194e01d34fc9ca7712c228f5b176b3a0485d3c0c264",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xb1aa4afa4abffed0f6b04a1237f1370a293d62108e27133cbea530a217af5f8b",
+      "condition_id": "0xf962712cccc05a383ec1d1e11dcb8a543aafc32804df6030f4e1bbbcdecd7a53",
       "error": "book_unavailable"
     },
     {
@@ -32,15 +28,15 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x20c34f68662f47fa7c283d469853f6b3f645c6a92dc1ae7c5df24285f2210cfc",
+      "condition_id": "0xb16e6a52685b585f98105b7f51bb88ac1631fa87e917c46d9a47ddfde359b2b4",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0xe4788d3f9f1fbaab2555929c3c3ab24a1fb0e499e5adea03409552307e1be02b",
+      "condition_id": "0xb1aa4afa4abffed0f6b04a1237f1370a293d62108e27133cbea530a217af5f8b",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0xe67549284468bf06bfbcfb3cb3a499630ed48b7917a9f0efc3c16705e30416f4",
+      "condition_id": "0x56aed2130ecbca8523f31b52acfa47df16927e9d76b303203bdf18f26cfb2ee4",
       "error": "book_unavailable"
     },
     {
@@ -48,15 +44,15 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0xf73312655883b25c3241bdf0891dc5305b2be1528bcc0b14196152ce2365fde4",
+      "condition_id": "0x025aefe1d21cc5d6040aea08a4f4deace087d286ab6eba25ff71ca321e694df6",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x61d5d04805c92aaad776dd47c0fbdc717f607422cbe4961412a53848e2f3bd4f",
+      "condition_id": "0x17ae3d66437071acaac1498f0f7acbd735b11a8677eef2ba06feaa8afac9046d",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x59278cdfd300208190aa616abb0471c9a736fa19da26a30c67c42a602ab49a61",
+      "condition_id": "0xa8e00288eab8cfcd407c31ee85634aabd35d6d6fc04b34bf59dc582e21ba05fb",
       "error": "book_unavailable"
     }
   ],
@@ -71,6 +67,6 @@
       60
     ]
   },
-  "jsonl": "state/flow_shadow/flow_shadow_2026-11-20T01-45-05Z_44655757644.jsonl",
-  "jsonl_branch_path": "flow_shadow/observations/2026-11-20/flow_shadow_2026-11-20T01-45-05Z_44655757644.jsonl"
+  "jsonl": "state/flow_shadow/flow_shadow_2026-11-20T09-54-03Z_44714436542.jsonl",
+  "jsonl_branch_path": "flow_shadow/observations/2026-11-20/flow_shadow_2026-11-20T09-54-03Z_44714436542.jsonl"
 }
