@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-21T01:10:19.945607+00:00",
-  "resolved_unique": 1582,
+  "generated_at": "2026-11-21T13:08:14.744679+00:00",
+  "resolved_unique": 1906,
   "target": 1000,
-  "percent": 158.2,
-  "v1_resolved": 1050,
-  "v2_resolved": 773,
-  "eval_records": 417196,
+  "percent": 190.6,
+  "v1_resolved": 1227,
+  "v2_resolved": 922,
+  "eval_records": 422659,
   "pending_unresolved": {
-    "v1": 9291,
-    "v2": 14894
+    "v1": 9145,
+    "v2": 15198
   },
   "gate_reached": true,
   "note": "Entry model frozen. Keep paper v2 running (ALLOW_NEW_ENTRIES=true). Do not tune alpha/beta/thresholds on the current sample."
