@@ -1,22 +1,26 @@
 {
-  "generated_at": "2026-11-20T18:28:13.192484+00:00",
-  "run_id": "44792897396",
-  "elapsed_seconds": 48.14,
-  "universe_markets": 1762,
-  "universe_discovered_at": "2026-11-20T18:27:30.799712+00:00",
+  "generated_at": "2026-11-21T00:10:02.878695+00:00",
+  "run_id": "44841830071",
+  "elapsed_seconds": 60.45,
+  "universe_markets": 1832,
+  "universe_discovered_at": "2026-11-21T00:09:10.089645+00:00",
   "selected_markets": 60,
-  "rows": 46,
+  "rows": 53,
   "errors": [
     {
       "condition_id": "0xf20d331cca9c22989f585f7c1b7b31abb09d92c5d2644f1b3103ad4462a4532b",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x45db1e390dccbce82b23f1b55831f15fbad35654c4d4eb09f0b723877494c548",
+      "condition_id": "0xe69cf987436179220d8710eecdd7d8d357db88b54f78befb4b76eecdc038384f",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x764bc08827901de802bb5a8d5820ace330b238a01c4e7861fff417bf0011b693",
+      "condition_id": "0x260e5283c678c4bd2190cb07b4099c9def3d0a1c51b19b92050eb93d5939d9c0",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0xe5fe20d80530026ce2ca953e0b313702d7c4efbcbb1251899f6b0e50c9d07c2d",
       "error": "book_unavailable"
     },
     {
@@ -28,39 +32,7 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x940420c41773235014a6cdbd72d0e2a8ae4bdf26f5405bebfc9e69e1d14b2240",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xb94df66d46ab4250565e4716b5c8939b7b665cd07fee67411eaeb11e128191e0",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xbf1a781c6bc7f3dd80ff9b10af7b0d2d26967a0ddfaa997da252039cb638c5e9",
-      "error": "book_unavailable"
-    },
-    {
       "condition_id": "0x20d9ada9175c4e4d1fa50d47510cf915da176dd3a2f22a5aac68a2277c52de7d",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x1112b5b2e6ac5a0b8aca998613ade4ab6b4fd6a475f5808bdea1c6390e0b01da",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x5d938478bfbfee0a36a717f4e2c7746229470a13db577440eb4694d5754e4d73",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x792dd80dfbb7e1a406a4bfb7c40e00221da45e01260093598e3ae7725da5fbda",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xf73312655883b25c3241bdf0891dc5305b2be1528bcc0b14196152ce2365fde4",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xdfba4a37340417117ae12859fa22b64edd3af3f935b20954cad872730a5c79de",
       "error": "book_unavailable"
     }
   ],
@@ -75,6 +47,6 @@
       60
     ]
   },
-  "jsonl": "state/flow_shadow/flow_shadow_2026-11-20T18-28-13Z_44792897396.jsonl",
-  "jsonl_branch_path": "flow_shadow/observations/2026-11-20/flow_shadow_2026-11-20T18-28-13Z_44792897396.jsonl"
+  "jsonl": "state/flow_shadow/flow_shadow_2026-11-21T00-10-02Z_44841830071.jsonl",
+  "jsonl_branch_path": "flow_shadow/observations/2026-11-21/flow_shadow_2026-11-21T00-10-02Z_44841830071.jsonl"
 }
