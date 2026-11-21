@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-21T00:10:02.878695+00:00",
-  "run_id": "44841830071",
-  "elapsed_seconds": 60.45,
-  "universe_markets": 1832,
-  "universe_discovered_at": "2026-11-21T00:09:10.089645+00:00",
+  "generated_at": "2026-11-21T07:38:22.641255+00:00",
+  "run_id": "44881087415",
+  "elapsed_seconds": 60.16,
+  "universe_markets": 1950,
+  "universe_discovered_at": "2026-11-21T07:37:30.240282+00:00",
   "selected_markets": 60,
-  "rows": 53,
+  "rows": 51,
   "errors": [
     {
       "condition_id": "0xf20d331cca9c22989f585f7c1b7b31abb09d92c5d2644f1b3103ad4462a4532b",
@@ -16,19 +16,27 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x260e5283c678c4bd2190cb07b4099c9def3d0a1c51b19b92050eb93d5939d9c0",
-      "error": "book_unavailable"
-    },
-    {
       "condition_id": "0xe5fe20d80530026ce2ca953e0b313702d7c4efbcbb1251899f6b0e50c9d07c2d",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0xb1aa4afa4abffed0f6b04a1237f1370a293d62108e27133cbea530a217af5f8b",
+      "condition_id": "0xaf4d963956b0c8d03e12bc849f27956f8ec1d4c0ee55afdfacbe4b15266218e3",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x56aed2130ecbca8523f31b52acfa47df16927e9d76b303203bdf18f26cfb2ee4",
+      "condition_id": "0x45db1e390dccbce82b23f1b55831f15fbad35654c4d4eb09f0b723877494c548",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0x147cccd5a8f18d1b8076d69661ed87b7b1522c62d0f2ec3cbf4267cc04118566",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0x5fadbb6f7f9762c8535821f5c19b044b759745aaa92a79794b0d2d43aafb5261",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0x128dd31471d661d41ed590828b8ae3930ad5316ba4464cfc2fddba94fe2a7678",
       "error": "book_unavailable"
     },
     {
@@ -47,6 +55,6 @@
       60
     ]
   },
-  "jsonl": "state/flow_shadow/flow_shadow_2026-11-21T00-10-02Z_44841830071.jsonl",
-  "jsonl_branch_path": "flow_shadow/observations/2026-11-21/flow_shadow_2026-11-21T00-10-02Z_44841830071.jsonl"
+  "jsonl": "state/flow_shadow/flow_shadow_2026-11-21T07-38-22Z_44881087415.jsonl",
+  "jsonl_branch_path": "flow_shadow/observations/2026-11-21/flow_shadow_2026-11-21T07-38-22Z_44881087415.jsonl"
 }
