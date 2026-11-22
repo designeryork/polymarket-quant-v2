@@ -1,42 +1,22 @@
 {
-  "generated_at": "2026-11-22T02:01:07.675233+00:00",
-  "run_id": "44974001491",
-  "elapsed_seconds": 55.64,
-  "universe_markets": 1536,
-  "universe_discovered_at": "2026-11-22T02:00:20.292070+00:00",
+  "generated_at": "2026-11-22T09:42:16.156631+00:00",
+  "run_id": "45008740796",
+  "elapsed_seconds": 47.08,
+  "universe_markets": 2010,
+  "universe_discovered_at": "2026-11-22T09:41:34.649326+00:00",
   "selected_markets": 60,
-  "rows": 41,
+  "rows": 48,
   "errors": [
     {
-      "condition_id": "0x0b572baee04798211430f145b2c4f9e1de1afe3ab69863b2f56abfcd8e2b1fad",
+      "condition_id": "0x65957219e36b6154459af51282fe35f3907878b66abe01ca740439a48f23ffd3",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0xbf4501d2e52133b5d8328033ecea297ff81b08d7811e9da65e7fe4550315943c",
+      "condition_id": "0xf9b2bd4d473b47e322e2fbe9b107099907a860d00ef3764d88bf0865f235ab90",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x1018c6fbee3f8901128919852ae53594373a8da6a1a7cf1af7db998b32f5561a",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xcc29d0a35caa85175785e582a210d8dafed6f47c104bd8e0462d6b4a5e613569",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xf0ab51833c5acf1bd790c8fbedb17b98a922984073c58eff926ec2e7828eadf1",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xc687cbfc768e65cd41d0bd1365efcad08657f23cb5e705c55ef6b259850127fd",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x55f558043859aeafc9327bd1f9c0d108892089464666b9fe456716a20cb53bc0",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xe441195bf806966b3f07f656e066b642f4c98d6a4d402104b13f14bc411ffad5",
+      "condition_id": "0xd980529c32b096390c6c587ebc5feeb75a9d293791808860eb06e743d10a4579",
       "error": "book_unavailable"
     },
     {
@@ -44,11 +24,7 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0xbdea0b887997c9b9426df8f58718e6868c1e4fee8c569a47153ec72cda55db0d",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x89004c62aa62d379e61f09a1ac67c60d4f87522496026be000185a51dbf059c1",
+      "condition_id": "0x4d88b22d96d23973c4778089848022b9a5eb2c1b8bf12ff3b0edca253e1905d3",
       "error": "book_unavailable"
     },
     {
@@ -56,27 +32,23 @@
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x3b7de630bc876c74d9a5a8b315508b9cee067e4edcae8d2c234c92f1ee9ea302",
-      "error": "book_unavailable"
-    },
-    {
       "condition_id": "0xb71a0b3f1b8589de12cc22781052c1063d5fa6a04c39b53e8267e1611eafbd7c",
       "error": "book_unavailable"
     },
     {
-      "condition_id": "0x79909c27cec20878d54e1ae855c89982a7359a2a5f09b7c3c74431cdbf32d410",
+      "condition_id": "0xcbc257699523f52d79554a58c0d5177d2f21ec9a78ba8a97d5b52da9bc34238d",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0x0ab12fc559c2a363f3bca7c124d2b7724aa11458c1f836d451a34848d3e1164b",
+      "error": "book_unavailable"
+    },
+    {
+      "condition_id": "0xce10919151662ee6a959b3e61e8778cf607afb0002536a6756eacbf2e2b8e41a",
       "error": "book_unavailable"
     },
     {
       "condition_id": "0x39863303583bcf9c9a470ca876740daa5df822a6246c6f0c710e0844b9ba72e2",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0xa87f40cce32a55fa4ae2b818f22cf32cdf4a5058d0314a57755cdba7fe73f21b",
-      "error": "book_unavailable"
-    },
-    {
-      "condition_id": "0x4343a0d1f6acb9a546312f2b4a6980d813879d0ba375af5c6144e774a7240d11",
       "error": "book_unavailable"
     },
     {
@@ -95,6 +67,6 @@
       60
     ]
   },
-  "jsonl": "state/flow_shadow/flow_shadow_2026-11-22T02-01-07Z_44974001491.jsonl",
-  "jsonl_branch_path": "flow_shadow/observations/2026-11-22/flow_shadow_2026-11-22T02-01-07Z_44974001491.jsonl"
+  "jsonl": "state/flow_shadow/flow_shadow_2026-11-22T09-42-16Z_45008740796.jsonl",
+  "jsonl_branch_path": "flow_shadow/observations/2026-11-22/flow_shadow_2026-11-22T09-42-16Z_45008740796.jsonl"
 }
